@@ -2,10 +2,42 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=flashcards_pro.html">
-<title>MedRecall · Parasitology Flashcards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedRecall · Flashcard Decks</title>
+<style>
+  :root{ --bg:#eef1e9; --paper:#fffdf8; --ink:#182420; --sub:#5c6b62; --line:#dde3d5; --teal:#1f6f54; --teal-deep:#12503b; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+    font-family:"Leelawadee UI","Noto Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+    display:flex; flex-direction:column; align-items:center; padding:48px 20px;
+  }
+  h1{ font-family:Georgia,"Noto Serif Thai",serif; font-size:24px; color:var(--teal-deep); margin:0 0 6px; }
+  p.sub{ color:var(--sub); font-size:13px; margin:0 0 28px; }
+  .deck-list{ width:100%; max-width:480px; display:flex; flex-direction:column; gap:14px; }
+  .deck-link{
+    display:block; background:var(--paper); border:1px solid var(--line); border-left:5px solid var(--teal);
+    border-radius:14px; padding:18px 20px; text-decoration:none; color:var(--ink);
+    box-shadow:0 1px 2px rgba(23,45,35,.04), 0 10px 22px -16px rgba(23,45,35,.25);
+    transition:transform .12s ease;
+  }
+  .deck-link:hover{ transform:translateY(-2px); }
+  .deck-link .name{ font-weight:700; font-size:16px; }
+  .deck-link .desc{ font-size:12.5px; color:var(--sub); margin-top:4px; }
+</style>
 </head>
 <body>
-<p>Redirecting… if nothing happens, <a href="flashcards_pro.html">click here</a>.</p>
+  <h1>MedRecall Flashcard Decks</h1>
+  <p class="sub">เลือกเด็คที่จะทวน</p>
+  <div class="deck-list">
+    <a class="deck-link" href="flashcards_pro.html">
+      <div class="name">Parasitology</div>
+      <div class="desc">โปรโตซัว หนอนพยาธิ แมลง — 32 ใบ</div>
+    </a>
+    <a class="deck-link" href="antiviral-antifungal-antiparasitic.html">
+      <div class="name">Antiviral / Antifungal / Antiparasitic</div>
+      <div class="desc">ยาต้านไวรัส เชื้อรา ปรสิต — 42 ใบ</div>
+    </a>
+  </div>
 </body>
 </html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antiviral / Antifungal / Antiparasitic Flashcards</title>
+<style>
+  :root{
+    --bg:#eef1e9; --paper:#fffdf8; --ink:#182420; --sub:#5c6b62;
+    --line:#dde3d5; --teal:#1f6f54; --teal-deep:#12503b; --teal-soft:#e2efe7;
+    --rust:#b5541f; --rust-soft:#f8e8dc;
+  }
+  *{box-sizing:border-box;}
+  html{height:auto;}
+  body{
+    margin:0; font-family:"Leelawadee UI","Noto Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink); min-height:100vh; background:var(--bg);
+    display:flex; flex-direction:column; align-items:center;
+    padding:32px 20px 48px;
+  }
+
+  #topbar{width:100%; max-width:640px; display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px;}
+  #topbar h1{margin:0; font-family:Georgia,"Noto Serif Thai",serif; font-weight:700; font-size:22px; color:var(--teal-deep);}
+  #topbar span.th{display:block; font-size:12px; color:var(--sub); margin-top:2px; font-weight:400;}
+  #restart-btn{
+    border:1px solid var(--line); background:var(--paper); color:var(--sub);
+    font-size:12px; padding:7px 14px; border-radius:20px; cursor:pointer; font-family:inherit; transition:.15s;
+  }
+  #restart-btn:hover{border-color:var(--teal); color:var(--teal-deep);}
+
+  #stats{width:100%; max-width:640px; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap;}
+  .stat-pill{font-size:11.5px; padding:5px 12px; border-radius:20px; background:var(--paper); border:1px solid var(--line); color:var(--sub);}
+  .stat-pill b{font-family:"Consolas",monospace; color:var(--ink); font-weight:600; font-size:12.5px;}
+
+  #mastery{width:100%; max-width:640px; margin-bottom:20px;}
+  #mastery .label{font-size:11px; color:var(--sub); margin-bottom:5px; display:flex; justify-content:space-between;}
+  #mastery .track{height:7px; border-radius:20px; background:var(--rust-soft); overflow:hidden; border:1px solid var(--line);}
+  #mastery .fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-deep)); width:0%; transition:width .4s ease;}
+
+  #card{
+    position:relative; width:100%; max-width:640px; background:var(--paper);
+    border:1px solid var(--line); border-left:5px solid var(--teal); border-radius:18px;
+    padding:32px 28px 26px; min-height:280px; display:flex; flex-direction:column;
+    box-shadow:0 1px 2px rgba(23,45,35,.04), 0 12px 28px -18px rgba(23,45,35,.25);
+    overflow:hidden; animation:rise .35s ease;
+  }
+  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  #card::after{
+    content:"Rx"; position:absolute; top:-14px; right:14px;
+    font-family:Georgia,serif; font-size:90px; font-weight:700; font-style:italic;
+    color:var(--teal); opacity:.06; line-height:1; pointer-events:none;
+  }
+  .cat-tag{
+    display:inline-block; font-size:10.5px; letter-spacing:.5px; text-transform:uppercase;
+    padding:3px 10px; border-radius:20px; margin-bottom:12px;
+    background:var(--teal-soft); color:var(--teal-deep); font-weight:600;
+    align-self:flex-start; font-family:"Consolas",monospace;
+  }
+  .question-text{font-family:Georgia,"Noto Serif Thai",serif; font-size:23px; font-weight:700; line-height:1.4; position:relative; z-index:1;}
+  .answer-wrap{margin-top:20px; padding-top:18px; border-top:1px dashed var(--line); position:relative; z-index:1;}
+  .answer-text{font-size:14px; line-height:1.85; color:#2b3a33; max-height:360px; overflow-y:auto; padding-right:6px; white-space:pre-line;}
+  .answer-text::-webkit-scrollbar{width:5px;}
+  .answer-text::-webkit-scrollbar-thumb{background:rgba(23,45,35,.18); border-radius:3px;}
+
+  .btn-row{margin-top:auto; padding-top:24px; display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1;}
+  .btn-row button{
+    flex:1; min-width:120px; border:none; border-radius:12px; padding:13px 16px;
+    font-family:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+    transition:transform .12s ease, filter .15s ease; color:#fff;
+  }
+  .btn-row button:hover{transform:translateY(-1px); filter:brightness(1.06);}
+  .btn-row button:active{transform:translateY(0);}
+  #show-btn{background:var(--teal-deep);}
+  #right-btn{background:var(--teal);}
+  #wrong-btn{background:var(--rust);}
+
+  #filters{width:100%; max-width:640px; margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    font-size:12px; padding:7px 14px; border-radius:20px;
+    background:var(--paper); border:1px solid var(--line); color:var(--sub);
+    cursor:pointer; font-family:inherit; transition:.15s;
+    display:flex; align-items:center; gap:6px;
+  }
+  .chip:hover{border-color:var(--teal); color:var(--teal-deep);}
+  .chip.active{background:var(--teal-deep); border-color:var(--teal-deep); color:#fff;}
+  .chip .n{font-family:"Consolas",monospace; font-size:11px; opacity:.75;}
+  .chip.active .n{opacity:.9;}
+
+  .hint{width:100%; max-width:640px; text-align:center; margin-top:14px; font-size:11px; color:var(--sub);}
+  .hint kbd{font-family:"Consolas",monospace; background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:10.5px;}
+
+  @media (max-width:480px){
+    body{padding:18px 14px 36px;}
+    .question-text{font-size:19px;}
+    #card{padding:24px 18px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <h1>Antiviral / Antifungal / Antiparasitic</h1>
+    <span class="th" id="deck-sub">ไวรัส · เชื้อรา · ปรสิต</span>
+  </div>
+  <button id="restart-btn">รีเซ็ตสถิติ ↻</button>
+</div>
+
+<div id="stats">
+  <span class="stat-pill">ทวนไปแล้ว <b id="stat-total">0</b> ใบ</span>
+  <span class="stat-pill">ตอบถูก <b id="stat-right">0</b></span>
+  <span class="stat-pill">ตอบผิด <b id="stat-wrong">0</b></span>
+</div>
+
+<div id="filters"></div>
+
+<div id="mastery">
+  <div class="label"><span>ระดับความชำนาญ</span><span id="mastery-pct">–</span></div>
+  <div class="track"><div class="fill" id="mastery-fill"></div></div>
+</div>
+
+<div id="card">
+  <span class="cat-tag" id="cat-tag"></span>
+  <div class="question-text" id="q-text"></div>
+  <div class="answer-wrap" id="answer" style="display:none;">
+    <div class="answer-text" id="a-text"></div>
+  </div>
+  <div class="btn-row">
+    <button id="show-btn">เฉลย (Show)</button>
+    <button id="right-btn" style="display:none;">ตอบถูก ✓</button>
+    <button id="wrong-btn" style="display:none;">ตอบผิด ✕</button>
+  </div>
+</div>
+
+<div class="hint">
+  <kbd>Space</kbd> เฉลย · <kbd>→</kbd> ถูก · <kbd>←</kbd> ผิด
+</div>
+
+<script>
+const DATA = {"labels": {"virus": ["Antiviral", "ไวรัส"], "fungus": ["Antifungal", "เชื้อรา"], "parasite": ["Antiparasitic", "ปรสิต"]}, "cards": [{"name": "Acyclovir (ACV)", "cat": "virus", "desc": "• Route/PK: PO (F ~15–30% ต่ำ), IV, topical. Renal excretion, t½ ~2.5 hr. ปรับ dose ตาม CrCl.\n• Advantage: เชื้อ resistant น้อย, selective toxicity ดีที่สุดในกลุ่ม, ราคาถูก, ให้ IV ได้ในเคสรุนแรง (encephalitis).\n• MOA: guanosine analog → HSV/VZV TK → ACV-MP → host kinase → ACV-TP → inhibit viral DNA pol + chain termination.\n• Clinical uses: HSV-1/2 (genital herpes, herpes labialis, herpes encephalitis IV), VZV (chickenpox, shingles ใน immunocompromised).\n• ADR: Nephrotoxicity จากตกผลึกใน renal tubule (crystalluria) → hydrate ก่อนให้ IV, phlebitis, neurotoxicity (confusion, tremor) ในผู้ป่วยไตเสื่อม.\n• Kill microbe: HSV-1 > HSV-2 > VZV (EBV/CMV ไวน้อยเพราะ TK อ่อน — ไม่ใช้กับ CMV)."}, {"name": "Valacyclovir", "cat": "virus", "desc": "• Route/PK: PO เท่านั้น. เป็น L-valyl ester prodrug ของ acyclovir → hydrolyzed ที่ตับ/ลำไส้ → F เพิ่ม 3–5 เท่า (~55%) เทียบกับ ACV.\n• Advantage: ให้กินน้อยครั้งกว่า ACV, plasma level ใกล้เคียง IV ACV, compliance ดี.\n• MOA: เหมือน ACV (prodrug → ACV).\n• Clinical uses: genital herpes (episodic/suppressive), herpes labialis, shingles.\n• ADR: เหมือน ACV + TTP/HUS ใน HIV/immunocompromised (high dose).\n• Kill microbe: HSV-1/2, VZV."}, {"name": "Famciclovir", "cat": "virus", "desc": "• Route/PK: PO. Prodrug ของ Penciclovir, deacetylated + oxidized ที่ตับ → penciclovir. F ~77%.\n• Advantage: F สูง, dosing น้อยครั้ง, t½ ใน cell นาน (~10 hr ใน HSV-infected cell).\n• MOA: เหมือน ACV (guanosine analog + viral TK dependent) แต่ penciclovir-TP ไม่ใช่ obligate chain terminator (มี 3'-OH) — inhibit DNA pol competitively.\n• Clinical uses: shingles (VZV), recurrent genital herpes.\n• ADR: ปวดหัว, คลื่นไส้, ท้องเสีย. Nephrotoxic น้อยกว่า ACV.\n• Kill microbe: HSV-1/2, VZV."}, {"name": "Penciclovir", "cat": "virus", "desc": "• Route/PK: Topical only (cream 1%). F PO ต่ำ ~5% เลยไม่ใช้กิน.\n• Advantage: intracellular t½ นาน, ใช้ทาแผลเริม lip ได้.\n• MOA: เหมือน famciclovir (active form).\n• Clinical uses: herpes labialis (topical).\n• ADR: ระคายเคืองผิว, แสบ.\n• Kill microbe: HSV-1 (แผลริมฝีปาก)."}, {"name": "Ganciclovir", "cat": "virus", "desc": "• Route/PK: IV (F PO ต่ำ ~6%). Renal excretion, ปรับตาม CrCl.\n• Advantage: first-line CMV, ได้ผลใน retinitis + disseminated disease.\n• MOA: guanosine analog → CMV UL97 kinase phosphorylate → host kinase → GCV-TP → inhibit CMV DNA polymerase (UL54) + chain termination.\n• Clinical uses: CMV retinitis (AIDS), CMV pneumonitis/colitis post-transplant, CMV prophylaxis in transplant.\n• ADR: Bone marrow suppression (neutropenia, thrombocytopenia) — ADR หลัก, teratogenic, carcinogenic, ↓sperm.\n• Kill microbe: CMV (also HSV, VZV, EBV, HHV-6/8 แต่ toxic เกินจะใช้)."}, {"name": "Valganciclovir", "cat": "virus", "desc": "• Route/PK: PO. L-valyl ester prodrug ของ ganciclovir → F ~60% (สูงขึ้น 10 เท่าจาก GCV oral).\n• Advantage: ให้กินได้ใน CMV retinitis maintenance/prophylaxis → ไม่ต้อง IV.\n• MOA: hydrolyzed → ganciclovir → เหมือน GCV.\n• Clinical uses: CMV retinitis (induction + maintenance), CMV prophylaxis in solid organ transplant.\n• ADR: เหมือน GCV — myelosuppression.\n• Kill microbe: CMV."}, {"name": "Foscarnet", "cat": "virus", "desc": "• Route/PK: IV. Renal excretion. ไม่ต้องใช้ TK/UL97 activate.\n• Advantage: ใช้ได้ในเคส GCV-resistant CMV (UL97 mutation) และ ACV-resistant HSV (TK-deficient).\n• MOA: Pyrophosphate analog → bind pyrophosphate binding site ของ viral DNA polymerase โดยตรง → block PPi release → หยุด DNA elongation. ไม่ต้องถูก phosphorylate.\n• Clinical uses: GCV-resistant CMV, ACV-resistant HSV/VZV.\n• ADR: Nephrotoxicity (major), electrolyte disturbance — hypocalcemia/hypomagnesemia/hypokalemia/hypo-hyperphosphatemia (Foscarnet = \"Fos-CA-net\" ดึง Ca), seizure จาก hypocalcemia, penile ulcer.\n• Kill microbe: CMV, HSV, VZV, HHV-6, HBV (secondary)."}, {"name": "Cidofovir", "cat": "virus", "desc": "• Route/PK: IV weekly (t½ ใน cell ยาว ~65 hr). ต้องให้ร่วม probenecid + saline ก่อน/หลังทุกครั้ง เพื่อลด nephrotoxicity.\n• Advantage: dosing น้อย (สัปดาห์ละครั้ง), ใช้ได้ใน GCV-resistant CMV.\n• MOA: Cytosine nucleotide analog (มี P ติดมาแล้ว) → ไม่ต้องใช้ viral kinase activate → host kinase เติม P → CDV-diphosphate → inhibit viral DNA polymerase + chain termination.\n• Clinical uses: CMV retinitis (GCV-resistant), acyclovir-resistant HSV, adenovirus, BK virus.\n• ADR: Severe nephrotoxicity (proximal tubular damage — Fanconi-like), neutropenia, ocular hypotony.\n• Kill microbe: CMV, HSV, VZV, adenovirus, papillomavirus, polyomavirus."}, {"name": "Oseltamivir (Tamiflu)", "cat": "virus", "desc": "• Route/PK: PO (prodrug oseltamivir phosphate → active carboxylate ที่ตับ). F ~80%. Renal excretion.\n• Advantage: กินได้ (ต่างจาก zanamivir), ใช้ prophylaxis + treatment, ให้เด็กได้.\n• MOA: Neuraminidase inhibitor — sialic acid analog → bind NA active site → virion ที่สร้างใหม่ไม่หลุดจากผิวเซลล์ → หยุดแพร่กระจาย.\n• Clinical uses: Influenza A + B — เริ่มภายใน 48 hr หลังมีอาการจะได้ผลดี, prophylaxis หลังสัมผัส.\n• ADR: คลื่นไส้อาเจียน (พบบ่อย), neuropsychiatric events (delirium, self-injury) ในเด็กญี่ปุ่นมีรายงาน.\n• Kill microbe: Influenza A & B."}, {"name": "Zanamivir (Relenza)", "cat": "virus", "desc": "• Route/PK: Inhalation (dry powder) — F PO ต่ำมาก. ออกฤทธิ์เฉพาะที่ทางเดินหายใจ.\n• Advantage: ใช้ได้ในเชื้อ oseltamivir-resistant บางสายพันธุ์ (H1N1 H275Y mutation).\n• MOA: neuraminidase inhibitor (เหมือน oseltamivir).\n• Clinical uses: Influenza A + B (start <48 hr).\n• ADR: Bronchospasm — ห้ามใน asthma/COPD, ระคายทางเดินหายใจ.\n• Kill microbe: Influenza A & B."}, {"name": "Zidovudine (AZT, ZDV) — NRTI", "cat": "virus", "desc": "• Route/PK: PO + IV. Hepatic glucuronidation → renal excretion.\n• Advantage: ตัวแรกที่ผ่าน BBB ดี — ใช้ใน HIV encephalopathy, ใช้ป้องกันการติดเชื้อจากแม่สู่ลูก (perinatal prophylaxis).\n• MOA: Thymidine analog → AZT-TP → block RT + chain terminator.\n• Clinical uses: HIV (combined regimen), prevention of vertical transmission (ทั้งแม่ตั้งครรภ์ + newborn), post-exposure prophylaxis.\n• ADR: Bone marrow suppression (anemia macrocytic + neutropenia — hallmark), myopathy, lactic acidosis + hepatic steatosis, ปวดหัว.\n• Kill microbe: HIV-1, HIV-2."}, {"name": "Lamivudine (3TC) — NRTI", "cat": "virus", "desc": "• Route/PK: PO. F >80%. Renal excretion (ไม่ metabolized).\n• Advantage: toxicity ต่ำที่สุดในกลุ่ม, ให้วันละครั้ง, ใช้ได้ทั้ง HIV + HBV (dual activity).\n• MOA: Cytosine analog → 3TC-TP → block RT (HIV) + HBV DNA polymerase / reverse transcriptase.\n• Clinical uses: HIV (backbone), chronic hepatitis B (single agent ได้แต่ resistance สูง → นิยม combine).\n• ADR: น้อยมาก — ปวดหัว, คลื่นไส้เล็กน้อย. ถ้าใช้ใน HBV แล้วหยุด → acute HBV flare ระวัง.\n• Kill microbe: HIV, HBV."}, {"name": "Tenofovir Disoproxil Fumarate (TDF) — NtRTI", "cat": "virus", "desc": "• Route/PK: PO prodrug → tenofovir (nucleotide, มี P ติดมา 1 ตัว). Renal excretion.\n• Advantage: ให้วันละครั้ง, potent vs HIV + HBV, resistance เกิดช้า, ใช้ PrEP (pre-exposure prophylaxis) ได้.\n• MOA: Adenosine nucleotide analog → phosphorylate 2 ครั้ง (ไม่ต้อง 3 ครั้งเพราะ NtRTI) → tenofovir-DP → block RT + chain terminator.\n• Clinical uses: HIV (first-line backbone), chronic hepatitis B, HIV PrEP.\n• ADR: Nephrotoxicity (proximal tubular dysfunction — Fanconi syndrome), ↓BMD (bone mineral density) → osteoporosis, ↑Cr. → รุ่นใหม่ TAF (tenofovir alafenamide) ลด ADR ไต/กระดูก.\n• Kill microbe: HIV, HBV."}, {"name": "Maraviroc", "cat": "virus", "desc": "• Route/PK: PO. CYP3A4 substrate → ระวัง drug interaction กับ ritonavir/rifampin.\n• Advantage: ต่างจาก RT inhibitor — block entry step ก่อนไวรัสเข้าเซลล์เลย, ใช้ในเคสดื้อยา.\n• MOA: CCR5 antagonist — bind host CCR5 co-receptor บน CD4+ T-cell → HIV gp120 R5-tropic strain ไม่สามารถ engage และเข้าเซลล์ได้. ต้อง test tropism assay ก่อน (ใช้ได้เฉพาะ R5-tropic virus, ใช้ไม่ได้กับ X4/dual-tropic).\n• Clinical uses: HIV-1 R5-tropic infection (salvage therapy หลังดื้อ NRTI/NNRTI/PI).\n• ADR: Hepatotoxicity (มี black box warning), URI, cough, orthostatic hypotension.\n• Kill microbe: HIV-1 R5-tropic strain only.\n📌 NNRTI (context): efavirenz, nevirapine, rilpivirine — bind allosteric site บน RT, non-competitive, ไม่ต้อง phosphorylate. PIs (context): atazanavir, darunavir, lopinavir/ritonavir — block HIV protease → virion ที่สร้างใหม่ไม่ mature."}, {"name": "Entecavir", "cat": "virus", "desc": "• Route/PK: PO. F ต่ำเมื่อกินพร้อมอาหาร → กินตอนท้องว่าง. Renal excretion.\n• Advantage: first-line HBV, potent มาก, resistance barrier สูง (ในผู้ป่วย naive), ให้วันละครั้ง.\n• MOA: Guanosine nucleoside analog → entecavir-TP → block HBV DNA polymerase (RT + DNA-dep DNA pol) ทั้ง 3 steps (priming, RNA→DNA, DNA→DNA).\n• Clinical uses: Chronic hepatitis B (HBeAg+ / HBeAg-).\n• ADR: ปวดหัว, อ่อนเพลีย, lactic acidosis ระวังใน decompensated cirrhosis. Cross-resistance กับ lamivudine — ถ้าเคยใช้ 3TC มาก่อนแล้วดื้อ → entecavir จะดื้อง่ายขึ้น.\n• Kill microbe: HBV."}, {"name": "Ribavirin", "cat": "virus", "desc": "• Route/PK: PO (+ inhaled สำหรับ RSV). F ~50%. Long t½. Renal excretion. Teratogenic (Pregnancy Cat X) → คุมกำเนิดทั้งชายและหญิงอย่างน้อย 6 เดือน.\n• Advantage: broad-spectrum antiviral, ใช้ adjunct กับ DAA (direct-acting antivirals) ใน HCV genotype แข็ง, ใช้ได้ใน RSV, Lassa, hantavirus.\n• MOA: Guanosine analog — หลายกลไก:\n1. Inhibit IMP dehydrogenase (IMPDH) → ↓ GTP pool\n2. Inhibit viral RNA polymerase\n3. Lethal mutagenesis — จับ RNA แล้วทำให้ error catastrophe\n4. Modulate Th1/Th2 response\n• Clinical uses: Chronic HCV (combined กับ DAA เช่น sofosbuvir/velpatasvir ในบาง genotype), RSV bronchiolitis (inhaled, severe), Lassa fever, hantavirus, chronic hepatitis E ใน immunocompromised.\n• ADR: Hemolytic anemia (dose-limiting — extravascular hemolysis), teratogenic, ไอ ผื่น ซึมเศร้า.\n• Kill microbe: HCV, RSV, Lassa, hantavirus, HEV, adenovirus (บาง context)."}, {"name": "Amphotericin B (AmB)", "cat": "fungus", "desc": "• Route/PK: IV (poor GI absorption). Highly protein-bound, t½ ยาวมาก (~15 วัน terminal). Liposomal AmB (L-AmB) ลด nephrotoxicity ได้เยอะ.\n• Advantage: broadest spectrum antifungal, fungicidal, first-line ใน systemic/life-threatening infection, resistance เกิดยาก.\n• MOA: Polyene macrolide → bind ergosterol บน fungal membrane → สร้าง pore/channel → K+, Mg2+ leak ออก → cell death. Oxidative damage เสริม.\n• Clinical uses:\n  • Systemic mycoses: Aspergillosis (IPA), Histoplasmosis (disseminated ใน HIV/AIDS CD4<150), Talaromycosis (T. marneffei ใน HIV CD4<100), cryptococcal meningitis (induction + flucytosine).\n  • Systemic candidiasis (invasive candidemia — C. albicans + non-albicans ที่ resist fluconazole).\n  • Mucormycosis/Zygomycosis (Rhizopus, Basidiobolus ranarum).\n  • Visceral leishmaniasis (Kala-azar) — Liposomal AmB = first-line ปัจจุบัน.\n  • Naegleria fowleri PAM — combination regimen (AmB + miltefosine + azithromycin + fluconazole + rifampin).\n• ADR:\n  • Infusion-related: ไข้ หนาวสั่น hypotension (\"shake and bake\") → premed acetaminophen + diphenhydramine + hydrocortisone.\n  • Nephrotoxicity — ADR หลัก (afferent arteriolar vasoconstriction + tubular damage), hypokalemia, hypomagnesemia.\n  • Anemia (↓EPO). Phlebitis.\n• Kill microbe: Yeasts + molds + dimorphic fungi — Candida, Cryptococcus, Aspergillus, Histoplasma, Talaromyces marneffei, Sporothrix, Mucorales, Coccidioides, Blastomyces, + Leishmania, + Naegleria."}, {"name": "Flucytosine (5-FC)", "cat": "fungus", "desc": "• Route/PK: PO (F >80%). Small MW, ผ่าน BBB ได้ดี → ใช้ CNS infection. Renal excretion → ปรับตาม CrCl.\n• Advantage: BBB penetration ดี, synergistic กับ AmB.\n• MOA: เชื้อรามีเอนไซม์ cytosine deaminase (คนไม่มี) → เปลี่ยน 5-FC → 5-FU → 5-FUTP block RNA synthesis + 5-FdUMP block thymidylate synthase → block DNA synthesis.\n• Clinical uses:\n  • Cryptococcal meningitis — combine กับ AmB (induction phase).\n  • Chromoblastomycosis (Fonsecaea pedrosoi), บาง systemic candidiasis.\n• ADR: Bone marrow suppression (neutropenia, thrombocytopenia — จาก 5-FU ที่เกิดจาก gut flora convert ในลำไส้), hepatotoxicity, GI upset.\n• Kill microbe: Cryptococcus neoformans, บาง Candida sp., chromomycosis. ห้ามให้เดี่ยว — resistance เกิดเร็ว."}, {"name": "Caspofungin (Echinocandin)", "cat": "fungus", "desc": "• Route/PK: IV only (F PO <5%). Hepatic metabolism. ไม่ต้องปรับ CrCl.\n• Advantage: Fungicidal vs Candida, selective toxicity สูง (mammalian cell ไม่มี glucan), toxicity ต่ำ, ใช้ในเคสดื้อ azole.\n• MOA: Inhibit β-1,3-D-glucan synthase (product ของ FKS1 gene) → ไม่มี β-glucan → cell wall ไม่แข็งแรง → osmotic lysis.\n• Clinical uses:\n  • Invasive candidiasis / candidemia — first-line.\n  • Invasive aspergillosis — salvage therapy (ถ้าใช้ voriconazole ไม่ได้).\n  • Esophageal candidiasis (fluconazole-resistant).\n  • Empirical antifungal ใน febrile neutropenia.\n• ADR: ไข้, phlebitis, ↑LFT, histamine-mediated flushing (rare). ค่อนข้าง safe.\n• Kill microbe: Candida spp. (รวม non-albicans, C. glabrata, C. krusei ที่ดื้อ azole), Aspergillus (fungistatic). ใช้ไม่ได้กับ Cryptococcus, Mucorales, dimorphic fungi."}, {"name": "Ketoconazole (Azole — imidazole รุ่นเก่า)", "cat": "fungus", "desc": "• Route/PK: PO, topical. ต้อง acidic pH ในกระเพาะ → PPI/H2-blocker ↓absorption. Hepatic metabolism.\n• Advantage: ราคาถูก, topical ยังใช้ได้ใน tinea/seborrheic dermatitis.\n• MOA: Inhibit fungal cytochrome P450 (CYP51 / lanosterol 14α-demethylase) → block conversion lanosterol → ergosterol → membrane แหว่ง → cell death. ที่ dose สูง ยัง inhibit mammalian CYP450 ทำให้เกิด adrenal + gonadal steroid synthesis ↓.\n• Clinical uses:\n  • Topical: tinea (Trichophyton, Epidermophyton, Microsporum), seborrheic dermatitis (Malassezia furfur — pityriasis versicolor).\n  • Systemic: Cushing syndrome adjunct (block steroidogenesis), prostate cancer (block androgen) — ไม่ใช่ antifungal role.\n• ADR:\n  • Hepatotoxicity (severe, black box) → US FDA ยกเลิก systemic indication เกือบทั้งหมด.\n  • Gynecomastia, ↓libido, impotence (block androgen synthesis).\n  • Adrenal insufficiency.\n  • Drug interaction เยอะ (CYP3A4 inhibitor).\n• Kill microbe: Malassezia, dermatophytes, Candida (topical)."}, {"name": "Itraconazole (Azole — triazole)", "cat": "fungus", "desc": "• Route/PK: PO (capsule ต้องกับอาหาร + acid; oral solution ต้อง empty stomach). Highly lipophilic → distribute ใน skin/nail/fat ดี. Hepatic metabolism (CYP3A4).\n• Advantage: spectrum กว้างกว่า fluconazole, ครอบคลุม dimorphic fungi + dermatophyte + Aspergillus บางเคส, penetrate skin/nail ดี.\n• MOA: เหมือน ketoconazole (block CYP51 → ↓ergosterol) แต่ selective ต่อ fungal CYP มากขึ้น → ADR ระบบ endocrine น้อยลง.\n• Clinical uses:\n  • Sporotrichosis (Sporothrix schenckii — lymphocutaneous) — first-line.\n  • Histoplasmosis (mild-moderate, non-CNS) — first-line.\n  • Talaromycosis — consolidation/maintenance หลัง induction ด้วย AmB.\n  • Blastomycosis, chromoblastomycosis (Fonsecaea).\n  • Onychomycosis (Trichophyton rubrum), tinea (dermatophyte).\n  • Aspergilloma (fungus ball ในโพรง TB เก่า).\n  • ABPA (allergic bronchopulmonary aspergillosis).\n• ADR: Negative inotropic effect → ห้ามใน CHF, hepatotoxicity, edema, hypokalemia, drug interaction (CYP3A4).\n• Kill microbe: Sporothrix, Histoplasma, Talaromyces marneffei, Blastomyces, Aspergillus, dermatophytes, Candida."}, {"name": "Terbinafine", "cat": "fungus", "desc": "• Route/PK: PO + topical. Highly lipophilic + keratophilic → concentrate ใน stratum corneum + nail plate นานหลายเดือน.\n• Advantage: first-line onychomycosis จาก dermatophyte, response rate สูง, dosing สั้น.\n• MOA: Inhibit squalene epoxidase → ↑ squalene (toxic to fungal cell) + ↓ ergosterol → fungicidal vs dermatophytes.\n• Clinical uses:\n  • Onychomycosis (Trichophyton rubrum) — first-line.\n  • Tinea capitis/corporis/pedis/cruris (dermatophytes).\n• ADR: GI upset, ปวดหัว, taste disturbance / loss (dysgeusia) — เอกลักษณ์, hepatotoxicity (rare — check LFT ก่อน), neutropenia.\n• Kill microbe: Dermatophytes (Trichophyton, Epidermophyton, Microsporum). Candida ไวน้อยกว่า."}, {"name": "Ibrexafungerp", "cat": "fungus", "desc": "• Route/PK: PO — novel oral triterpenoid glucan synthase inhibitor. Hepatic metabolism.\n• Advantage: PO alternative to echinocandin (IV เท่านั้น), ใช้ได้ใน azole-resistant Candida, MDR C. auris. Selective toxicity สูง.\n• MOA: Inhibit β-1,3-D-glucan synthase (คล้าย caspofungin แต่คนละ class — triterpenoid, ไม่มี cross-resistance เต็มรูปแบบ) → cell wall แตก.\n• Clinical uses: Vulvovaginal candidiasis (VVC — \"cottage cheese discharge\"), recurrent VVC prophylaxis. ในการศึกษา: invasive candidiasis (adjunct).\n• ADR: ท้องเสีย, คลื่นไส้, ปวดหัว, dizziness. Teratogenic → ห้ามในหญิงตั้งครรภ์.\n• Kill microbe: Candida spp. (รวม C. glabrata, C. auris, fluconazole-resistant strains)."}, {"name": "Griseofulvin", "cat": "fungus", "desc": "• Route/PK: PO. Absorption ดีขึ้นเมื่อกินกับอาหารมันๆ (lipophilic). Deposit ที่ keratin precursor cell → ยาไปอยู่ที่ผิว/ผม/เล็บ. Hepatic metabolism.\n• Advantage: ราคาถูก, ใช้ใน pediatric tinea capitis ได้ (Microsporum).\n• MOA: Interfere microtubule function (bind tubulin) → block mitotic spindle → ยับยั้ง fungal mitosis + interfere keratin deposition ใน newly synthesized keratin → keratin ใหม่ที่มียาอยู่ = ทน dermatophyte.\n• Clinical uses:\n  • Tinea capitis (Microsporum, Trichophyton) — โดยเฉพาะในเด็ก.\n  • Tinea corporis, cruris, pedis, unguium — ต้องใช้นานหลายเดือน → ปัจจุบันแทนด้วย terbinafine/itraconazole.\n• ADR: ปวดหัว (พบบ่อย), disulfiram-like reaction กับ alcohol, ผื่นแพ้แดด (photosensitivity), CYP450 inducer → ↓warfarin/OCP efficacy, teratogenic.\n• Kill microbe: Dermatophytes only — Trichophyton, Microsporum, Epidermophyton. ใช้ไม่ได้กับ Candida, ยีสต์อื่น."}, {"name": "Metronidazole", "cat": "parasite", "desc": "• Route/PK: PO, IV, topical, PR. F >90% PO. BBB penetration ดี — ใช้ brain abscess ได้. Hepatic metabolism.\n• Advantage: ครอบคลุม anaerobe + microaerophilic protozoa, ราคาถูก, F สูง.\n• MOA: Prodrug — เข้าเชื้อ anaerobe → ferredoxin/PFOR ให้ electron reduce nitro group → reactive nitro radical/nitroso intermediate → damage DNA (strand break) → เชื้อตาย. ต้องการ low redox environment → เชื้อ aerobic activate ไม่ได้ → selective.\n• Clinical uses:\n  • Entamoeba histolytica — Amoebiasis (invasive form; liver abscess \"anchovy paste\") → first-line ตามด้วย luminal agent (paromomycin/diloxanide).\n  • Giardia lamblia — Giardiasis (steatorrhea, non-invasive, sucking disc) → first-line.\n  • Trichomonas vaginalis (STI).\n  • Balantidium coli — alternative (gold standard = tetracycline).\n  • Anaerobic bacteria (Bacteroides, Clostridium difficile, brain abscess).\n  • Helicobacter pylori (triple therapy).\n• ADR: Disulfiram-like reaction (ห้าม alcohol!!), metallic taste, peripheral neuropathy (long use), seizure (rare), dark urine (harmless), leukopenia.\n• Kill microbe: E. histolytica, Giardia, Trichomonas, anaerobes."}, {"name": "Pentamidine", "cat": "parasite", "desc": "• Route/PK: IV, IM, inhaled (aerosolized). Poor PO absorption. Long t½.\n• Advantage: ทางเลือกใน Pneumocystis, trypanosomiasis, leishmaniasis.\n• MOA: ไม่ชัด แต่คาดว่า bind kinetoplast DNA (kDNA) — พยาธิ trypanosomatid/Leishmania มี kinetoplast → disrupt mitochondrial function, ยัง inhibit topoisomerase, RNA polymerase.\n• Clinical uses:\n  • Pneumocystis jirovecii pneumonia (PCP) — 2nd line เมื่อ TMP-SMX ใช้ไม่ได้ (aerosolized สำหรับ prophylaxis).\n  • African trypanosomiasis (T. brucei gambiense — early stage, ก่อนเข้า CNS).\n  • Leishmaniasis (visceral + cutaneous, alternative).\n• ADR: Hypoglycemia จากนั้น hyperglycemia (damage pancreatic β-cell), nephrotoxicity, hypotension, arrhythmia (QT prolong), pancreatitis.\n• Kill microbe: Pneumocystis jirovecii, Trypanosoma brucei (early), Leishmania."}, {"name": "Pyrimethamine", "cat": "parasite", "desc": "• Route/PK: PO. Long t½ (~4 วัน). Hepatic metabolism.\n• Advantage: synergistic กับ sulfadiazine (sequential blockade of folate pathway).\n• MOA: Inhibit protozoal dihydrofolate reductase (DHFR) → block folate → block DNA synthesis. Selective เพราะเชื้อ DHFR affinity สูงกว่า human DHFR มาก.\n• Clinical uses:\n  • Toxoplasmosis (Toxoplasma gondii — encephalitis ใน AIDS) — combine กับ sulfadiazine + leucovorin (rescue human folate).\n  • Malaria prophylaxis/treatment — combine กับ sulfadoxine (Fansidar®) แต่ปัจจุบันดื้อมาก, ใช้เฉพาะ IPTp (intermittent preventive treatment in pregnancy).\n  • Isosporiasis, cyclosporiasis.\n• ADR: Megaloblastic anemia (folate deficiency in human — ต้องให้ folinic acid/leucovorin ป้องกัน), rash, GI upset, teratogenic (1st trimester).\n• Kill microbe: Toxoplasma, Plasmodium (limited by resistance), Isospora, Cyclospora."}, {"name": "Chloroquine (CQ)", "cat": "parasite", "desc": "• Route/PK: PO (F >80%). Long t½ (~1–2 เดือน) จาก tissue binding เยอะ. Hepatic + renal.\n• Advantage: ราคาถูก, ใช้กันมานาน, ปลอดภัยในหญิงตั้งครรภ์, ให้ prophylaxis ได้ในพื้นที่ที่ยังไม่ดื้อ.\n• MOA:\n1. Weak base → accumulate ใน parasite food vacuole (acidic).\n2. Malaria parasite ย่อย hemoglobin → ปล่อย heme (toxic to parasite) → ปกติ parasite polymerize heme → hemozoin (non-toxic pigment).\n3. Chloroquine bind heme → block polymerization → heme สะสม → toxic → parasite ตาย.\n📍 Cycle point: Erythrocytic (blood) schizont ระยะ trophozoite (ตอน hemoglobin digestion). ไม่ฆ่า hypnozoite, ไม่ฆ่า gametocyte P. falciparum.\n• Clinical uses:\n  • Uncomplicated malaria จาก P. vivax, P. ovale, P. malariae, chloroquine-sensitive P. falciparum (ปัจจุบัน P. falciparum ดื้อ CQ เกือบทั่วโลกรวม SEA → ไม่ใช้).\n  • Amoebic liver abscess (adjunct หลัง metronidazole เพราะ CQ concentrate ที่ตับ).\n  • Rheumatologic: RA, SLE (hydroxychloroquine ปลอดภัยกว่า).\n• ADR: Retinal toxicity (long-term — bull's-eye maculopathy — irreversible), pruritus (Africans), QT prolong, cardiomyopathy, hemolysis in G6PD (mild), CQ overdose = deadly (arrhythmia).\n• Kill microbe: Plasmodium spp. (blood stage; sensitive strains only), Entamoeba histolytica (liver)."}, {"name": "Primaquine", "cat": "parasite", "desc": "• Route/PK: PO. Rapid absorption. Hepatic metabolism (CYP2D6 → active metabolite).\n• Advantage: ตัวเดียวที่ฆ่า hypnozoite ได้ → ป้องกัน relapse ใน P. vivax/ovale.\n• MOA: 8-aminoquinoline → metabolite generate reactive oxygen species (ROS) ใน parasite → damage mitochondria + DNA. ต้องมี CYP2D6 activity.\n📍 Cycle point:\n  • Hypnozoite (dormant liver stage) ของ P. vivax + P. ovale — radical cure.\n  • Gametocyte ของ P. falciparum → block transmission (single low dose).\n  • ไม่ฆ่า blood stage schizont → ต้องให้ ร่วมกับ chloroquine/ACT.\n• Clinical uses:\n  • Radical cure for P. vivax + P. ovale relapse prevention (หลัง CQ กำจัด blood stage).\n  • Single-dose gametocidal สำหรับ P. falciparum (transmission blocking).\n  • Pneumocystis jirovecii (combine clindamycin — 2nd line).\n• ADR:\n  • Hemolytic anemia in G6PD deficiency — ต้อง check G6PD ก่อนให้ทุกครั้ง (สำคัญมากในไทย/SEA).\n  • Methemoglobinemia (CYP2D6-related).\n  • GI upset.\n  • ห้ามในหญิงตั้งครรภ์ (ไม่รู้ G6PD ของทารก).\n• Kill microbe: P. vivax + P. ovale hypnozoite, P. falciparum gametocyte, Pneumocystis."}, {"name": "Mefloquine", "cat": "parasite", "desc": "• Route/PK: PO. F ~85%. Long t½ (~2–4 สัปดาห์) → ให้สัปดาห์ละครั้งได้.\n• Advantage: ใช้ได้ใน CQ-resistant P. falciparum, ให้สัปดาห์ละครั้งสะดวก prophylaxis.\n• MOA: คล้าย quinine — quinoline-methanol → เชื่อว่า disrupt heme polymerization ใน food vacuole (แต่คนละ site จาก CQ) + damage parasite membrane.\n📍 Cycle point: Erythrocytic (blood) schizont — ทุก species. ไม่ฆ่า hypnozoite.\n• Clinical uses:\n  • Prophylaxis + treatment of chloroquine-resistant P. falciparum + P. vivax.\n  • Artesunate-mefloquine ACT — first-line treatment ในหลายพื้นที่ (รวม Thai-Myanmar border ในบางช่วง).\n• ADR:\n  • Neuropsychiatric ADR — nightmare vivid, insomnia, anxiety, depression, psychosis, seizure — ห้ามในคนมีประวัติ psych illness / seizure.\n  • Cardiac conduction abnormality (QT).\n  • GI upset.\n• Kill microbe: Plasmodium blood stage."}, {"name": "Quinine", "cat": "parasite", "desc": "• Route/PK: PO + IV (severe). Short t½ (~11 hr) → ต้องให้บ่อย. Hepatic metabolism.\n• Advantage: old drug, effective ใน severe malaria แต่ปัจจุบันแทนด้วย artesunate.\n• MOA: เหมือน CQ/mefloquine — bind heme + block hemozoin polymerization, disrupt food vacuole function.\n📍 Cycle point: Erythrocytic (blood) schizont — ทุก species (schizonticide). ไม่ฆ่า hypnozoite/gametocyte แข็ง.\n• Clinical uses:\n  • Severe malaria (2nd line ถ้าไม่มี artesunate).\n  • Uncomplicated malaria (combine กับ doxycycline/clindamycin).\n  • Nocturnal leg cramp (off-label — เดิม).\n  • Babesiosis (combine clindamycin).\n• ADR: Cinchonism syndrome — tinnitus, ปวดหัว, dizziness, blurred vision, คลื่นไส้ (dose-dependent, reversible). Hypoglycemia (stimulate insulin release — โดยเฉพาะในหญิงตั้งครรภ์กับ severe malaria), hemolysis in G6PD, thrombocytopenia (immune-mediated), arrhythmia (QT prolong), blackwater fever.\n• Kill microbe: Plasmodium blood stage, Babesia."}, {"name": "Artesunate (+ Artemisinin derivatives)", "cat": "parasite", "desc": "• Route/PK: IV, IM, PO, PR. Rapid onset. Short t½ (~45 min → must combine (ACT) เพื่อไม่ให้ recrudescence).\n• Advantage: Fastest-acting antimalarial, kills widest range of parasite stages, ลด mortality ใน severe malaria (SEAQUAMAT + AQUAMAT trial), safe in 2nd/3rd trimester pregnancy.\n• MOA:\n  • Endoperoxide bridge — react กับ Fe2+ (จาก heme) ใน parasite food vacuole → generate free radicals (carbon-centered) → alkylate + damage parasite proteins, membrane, PfATP6.\n  • ต้องมี Fe2+/heme เป็น catalyst → selective ต่อ infected RBC.\n📍 Cycle point: Broad — ring, trophozoite, schizont, young gametocyte ของ P. falciparum (kills more stages than any other class). ไม่ฆ่า hypnozoite, ไม่ฆ่า mature stage V gametocyte (single dose primaquine เสริมได้).\n• Clinical uses:\n  • IV artesunate = gold standard for severe malaria (P. falciparum) — cerebral malaria, severe anemia, AKI, ARDS.\n  • ACT (Artemisinin-based Combination Therapy) — first-line uncomplicated P. falciparum: artesunate-mefloquine, artemether-lumefantrine, dihydroartemisinin-piperaquine.\n• ADR: Post-artesunate delayed hemolysis (PADH) — hemolysis 1–3 สัปดาห์หลัง treatment ใน severe malaria (monitor CBC), reticulocytopenia, ↑LFT, cardiac (mild), Q wave prolongation. Overall very safe.\n• Kill microbe: Plasmodium (broad stage kill), Schistosoma (mild activity)."}, {"name": "Mebendazole", "cat": "parasite", "desc": "• Route/PK: PO. F ต่ำมาก (~5%) — ดี! อยู่ในลำไส้เกือบทั้งหมด → ฆ่าพยาธิลำไส้โดย systemic exposure น้อย. F เพิ่มถ้ากินกับอาหารมัน. Hepatic metabolism.\n• Advantage: dose เดียวได้ผลใน pinworm, ท้องเสียน้อย, ราคาถูก.\n• MOA: Benzimidazole → bind β-tubulin ของหนอน (helminth-selective) → block microtubule polymerization → glucose uptake ล้มเหลว → พยาธิขาด ATP + glycogen → ตาย. Selective เพราะ β-tubulin ของ mammal affinity ต่ำ.\n• Clinical uses:\n  • Enterobius vermicularis (pinworm) — nocturnal pruritus ani, single dose ซ้ำ 2 wk (รักษาทั้งบ้าน).\n  • Ascaris lumbricoides (giant roundworm) — Löffler's syndrome + intestinal obstruction.\n  • Trichuris trichiura (whipworm) — Mebendazole = first-line (Albendazole ได้ผลน้อยกว่าใน single dose).\n  • Hookworm (Ancylostoma/Necator) — anemia.\n  • Trichinellosis (Trichinella spiralis) — + corticosteroid ในเคสรุนแรง.\n• ADR: GI upset, headache. Bone marrow suppression (rare, high dose long duration). Teratogenic (avoid 1st trimester).\n• Kill microbe: Nematodes (roundworms) — Enterobius, Ascaris, Trichuris, Hookworms, Trichinella."}, {"name": "Albendazole", "cat": "parasite", "desc": "• Route/PK: PO. F ต่ำ but F ↑↑ เมื่อกินกับ fatty meal (systemic activity ดีกว่า mebendazole → ใช้ tissue helminth ได้). Hepatic → active albendazole sulfoxide (systemic).\n• Advantage: systemic penetration ดี → ใช้ tissue larval infection (cysticercosis, hydatid, gnathostomiasis).\n• MOA: benzimidazole เหมือน mebendazole — block β-tubulin polymerization → หนอนขาด glucose.\n• Clinical uses:\n  • Ascaris lumbricoides — single dose.\n  • Enterobius vermicularis — single dose + repeat 2 wk.\n  • Hookworm — single dose.\n  • Strongyloides stercoralis — 2nd line (Ivermectin = first line).\n  • Trichinella spiralis (Trichinosis) + corticosteroid ในรายรุนแรง.\n  • Gnathostoma spinigerum (พยาธิตัวจี๊ด) — Cutaneous larva migrans + eosinophilic meningoencephalitis — first-line.\n  • Echinococcus granulosus (Hydatid cyst) — combine กับผ่าตัด หรือ PAIR.\n  • Neurocysticercosis (T. solium larval — combine กับ steroid + AED).\n  • Filariasis (combine DEC/ivermectin).\n• ADR: ↑LFT, headache, teratogenic, bone marrow suppression (long course), reversible alopecia.\n• Kill microbe: Broad nematode + cestode (larval form)."}, {"name": "Ivermectin", "cat": "parasite", "desc": "• Route/PK: PO (F ต่ำ), topical. Long t½ (~18 hr). Hepatic metabolism. ไม่ผ่าน BBB ในมนุษย์ (P-glycoprotein pump ออก) → selective toxicity ต่อ parasite CNS.\n• Advantage: single dose, safe, broad-spectrum ectoparasite + nematode.\n• MOA: Bind glutamate-gated Cl⁻ channel (พบใน invertebrate CNS + muscle) → Cl⁻ influx → hyperpolarization → paralysis + ตาย. Mammal ไม่มี GluCl → selective. BBB ปกป้อง mammal CNS.\n• Clinical uses:\n  • Strongyloides stercoralis — first-line — โดยเฉพาะ hyperinfection syndrome / disseminated form.\n  • Sarcoptes scabiei (Scabies) — oral ivermectin, alternative to permethrin, first-line ใน crusted (Norwegian) scabies.\n  • Onchocerciasis (river blindness — O. volvulus).\n  • Lymphatic filariasis (combine albendazole) — ใช้ Ivermectin + Albendazole แทน DEC ในพื้นที่ที่มี onchocerciasis/loiasis ร่วม.\n  • Cutaneous larva migrans, head lice (alternative).\n• ADR: โดยรวม safe. Mazzotti reaction ใน onchocerciasis (ไข้ ผื่น คัน — จาก microfilaria ตายพร้อมกัน). Encephalopathy ใน Loa loa ที่ microfilarial count สูง.\n• Kill microbe: Strongyloides, Onchocerca, Wuchereria/Brugia (adjunct), Sarcoptes scabiei, Pediculus, larva migrans."}, {"name": "Diethylcarbamazine (DEC)", "cat": "parasite", "desc": "• Route/PK: PO. Rapid absorption, F สูง. Renal excretion — alkalinize urine → prolong t½.\n• Advantage: ราคาถูก, มีมานาน, standard สำหรับ lymphatic filariasis.\n• MOA: ไม่ชัด, เสนอ 2 กลไก:\n1. Immobilize microfilaria → enhance clearance โดย host reticuloendothelial system (spleen/liver).\n2. Alter parasite surface → กระตุ้น host immune attack.\n3. Interfere arachidonic acid metabolism ของ microfilaria.\n• Clinical uses:\n  • Wuchereria bancrofti — Lymphatic filariasis (โรคเท้าช้าง) — first-line.\n  • Brugia malayi — Malayan filariasis — first-line.\n  • Loa loa (loiasis) — with caution (encephalopathy risk if high microfilaremia).\n  • Tropical pulmonary eosinophilia (occult filarial hypersensitivity).\n• ADR:\n  • Mazzotti-like reaction (ไข้ ปวดหัว ผื่น ปวดกล้ามเนื้อ — จาก microfilaria ตายเยอะพร้อมกัน) → premedicate ด้วย antihistamine/steroid.\n  • ห้ามใน onchocerciasis — เสี่ยง blindness (severe ocular reaction) → ใช้ ivermectin แทน.\n  • ห้ามใน loa loa ที่ microfilaremia สูง (>2500/mL) — เสี่ยง fatal encephalopathy.\n• Kill microbe: W. bancrofti, B. malayi, Loa loa (microfilariae + adult worm บางส่วน)."}, {"name": "Praziquantel", "cat": "parasite", "desc": "• Route/PK: PO. F สูง (~80%) แต่ first-pass metabolism เยอะ → give หลายครั้ง. BBB penetration พอ. Hepatic metabolism (CYP3A4).\n• Advantage: broad-spectrum trematode + cestode, single-day treatment.\n• MOA: ↑ Ca²⁺ influx เข้าเซลล์กล้ามเนื้อของ trematode/cestode → tetanic contraction + paralysis → tegument (ผิวหนอน) เสียหาย + expose antigen → host immune attack.\n• Clinical uses:\n  • Opisthorchis viverrini (พยาธิใบไม้ตับ — เสี่ยง cholangiocarcinoma) — first-line.\n  • Paragonimus sp. (พยาธิใบไม้ปอด — ไอเป็นเลือดสนิม).\n  • Fasciolopsis buski (พยาธิใบไม้ลำไส้).\n  • Schistosoma mansoni (พยาธิใบไม้เลือด — Katayama, periportal fibrosis) — first-line.\n  • Taenia saginata / T. solium (Taeniasis, intestinal) — single dose (ระวัง neurocysticercosis coexist → ต้อง exclude ก่อนให้).\n  • Cysticercosis (T. solium larval — combine steroid + AED).\n  • Clonorchis sinensis, Fasciola hepatica (Fasciola: triclabendazole ดีกว่า).\n• ADR: โดยรวม safe. Dizziness, ปวดหัว, GI upset, urticaria (จาก dead worm antigen), exacerbation ของ neurocysticercosis symptoms (worm ในสมองตาย → บวม → seizure) → ให้ steroid ป้องกัน.\n• Kill microbe: Trematodes (flukes) + Cestodes (tapeworms). ไม่ครอบ nematode."}, {"name": "Niclosamide", "cat": "parasite", "desc": "• Route/PK: PO. Poorly absorbed — อยู่ในลำไส้ → ฆ่าตัวแก่ในลำไส้เท่านั้น.\n• Advantage: ตัวเลือกสำหรับ Taenia intestinal ในบางบริบท, safe ในหญิงตั้งครรภ์ (ไม่ absorb).\n• MOA: Uncouple oxidative phosphorylation ใน mitochondria ของ cestode + block anaerobic ATP production (glucose uptake ↓, block ATP generation) → tapeworm ตายในลำไส้.\n• Clinical uses:\n  • Taenia saginata, T. solium (adult intestinal tapeworm) — alternative to praziquantel.\n  • Diphyllobothrium latum, Hymenolepis nana.\n• ADR: GI upset, ปวดหัว. ห้ามใน T. solium neurocysticercosis ที่ต้องการฆ่า larval form (niclosamide ไม่ absorb → ไม่ถึง cyst; และ intestinal worm ตาย → ปล่อยไข่ → autoinfection → cysticercosis) → praziquantel ดีกว่าถ้าสงสัย coexistence.\n• Kill microbe: Adult intestinal cestodes (Taenia, Diphyllobothrium, Hymenolepis)."}, {"name": "🧬 Antiviral by Target (สรุป)", "cat": "virus", "desc": "Target: HSV/VZV TK-dependent DNA pol | Drugs: Acyclovir, Valacyclovir, Famciclovir, Penciclovir | Kill: HSV, VZV\nTarget: CMV UL97 + UL54 | Drugs: Ganciclovir, Valganciclovir | Kill: CMV\nTarget: Viral DNA pol (TK-independent) | Drugs: Foscarnet (PPi analog), Cidofovir (nucleotide) | Kill: CMV, HSV-resist\nTarget: Neuraminidase | Drugs: Oseltamivir, Zanamivir | Kill: Influenza A/B\nTarget: HIV RT (NRTI) | Drugs: Zidovudine, Lamivudine | Kill: HIV (+HBV for 3TC)\nTarget: HIV RT (NtRTI) | Drugs: Tenofovir | Kill: HIV, HBV\nTarget: HIV CCR5 co-receptor | Drugs: Maraviroc | Kill: HIV R5-tropic\nTarget: HBV RT/DNA pol | Drugs: Entecavir, Tenofovir, Lamivudine | Kill: HBV\nTarget: Multiple (IMPDH, RNA pol, mutagen) | Drugs: Ribavirin | Kill: HCV, RSV"}, {"name": "🍄 Antifungal by Target (สรุป)", "cat": "fungus", "desc": "Target: Ergosterol (pore) | Drugs: Amphotericin B | Signature clinical: Systemic mycoses, Kala-azar\nTarget: Ergosterol synth (CYP51) | Drugs: Ketoconazole, Itraconazole | Signature clinical: Dermatophyte, Histoplasma, Sporothrix\nTarget: Squalene epoxidase | Drugs: Terbinafine | Signature clinical: Onychomycosis (Trichophyton)\nTarget: β-1,3-glucan synthase | Drugs: Caspofungin (IV), Ibrexafungerp (PO) | Signature clinical: Invasive candidiasis, VVC\nTarget: Cytosine deaminase → 5-FU → DNA/RNA | Drugs: Flucytosine | Signature clinical: Cryptococcal meningitis (+AmB)\nTarget: Microtubule / keratin | Drugs: Griseofulvin | Signature clinical: Tinea capitis (Microsporum)"}, {"name": "🪱 Antiparasitic Quick Match (สรุป)", "cat": "parasite", "desc": "Balantidium coli | Gold standard: Tetracycline (alt: Metronidazole)\nEntamoeba histolytica (invasive) | Metronidazole → Paromomycin\nGiardia lamblia | Metronidazole / Tinidazole\nP. falciparum severe | IV Artesunate\nP. falciparum uncomplicated | ACT (Artesunate-Mefloquine)\nP. vivax radical cure | CQ + Primaquine (hypnozoite)\nTrypanosoma cruzi | Benznidazole\nOpisthorchis viverrini | Praziquantel\nParagonimus | Praziquantel\nAscaris | Albendazole / Mebendazole\nTrichuris | Mebendazole\nFasciolopsis buski | Praziquantel\nSchistosoma mansoni | Praziquantel\nHookworm | Albendazole / Mebendazole\nTaenia (intestinal) | Praziquantel (alt: Niclosamide)\nEnterobius | Albendazole/Mebendazole + repeat 2wk\nLeishmania (visceral) | Liposomal Amphotericin B\nWuchereria bancrofti | DEC\nBrugia malayi | DEC\nPediculus / Phthirus | Permethrin\nTrichinella | Albendazole/Mebendazole + steroid\nGnathostoma | Albendazole\nEchinococcus | Albendazole + surgery/PAIR\nNaegleria fowleri | Amphotericin B + miltefosine cocktail\nSarcoptes scabiei | Permethrin 5% (alt: Ivermectin oral)\nStrongyloides | Ivermectin"}, {"name": "🎯 Malaria — Cycle-Blocking Point Cheat Sheet", "cat": "parasite", "desc": "Drug: Chloroquine | 📍 Block point: Blood schizont (heme polymerization in food vacuole)\nDrug: Quinine | 📍 Block point: Blood schizont (heme polymerization, food vacuole)\nDrug: Mefloquine | 📍 Block point: Blood schizont\nDrug: Artesunate | 📍 Block point: Broad blood stages — ring→troph→schizont→young gametocyte (Fe²⁺/heme-activated radicals)\nDrug: Primaquine | 📍 Block point: Hypnozoite (liver) — P. vivax/ovale, + P. falciparum gametocyte\nDrug: Pyrimethamine | 📍 Block point: Blood schizont (protozoal DHFR, folate)"}]};
+
+const MIN_W = 0.25;
+const MAX_W = 12;
+const STORAGE_KEY = 'avfp_flashcards_v1';
+
+let cards = [];
+let activeCat = 'all';
+let totalShown = 0, totalRight = 0, totalWrong = 0;
+let current = null, prev = null;
+
+function getPool(){
+  return activeCat === 'all' ? cards : cards.filter(function(c){ return c.cat === activeCat; });
+}
+
+function renderFilters(){
+  var wrap = document.getElementById('filters');
+  wrap.innerHTML = '';
+  var order = ['all','virus','fungus','parasite'];
+  var labels = {all:['ทั้งหมด','All']};
+  Object.keys(DATA.labels).forEach(function(k){ labels[k] = DATA.labels[k].slice().reverse(); });
+  order.forEach(function(k){
+    var count = k === 'all' ? cards.length : cards.filter(function(c){ return c.cat === k; }).length;
+    var btn = document.createElement('button');
+    btn.className = 'chip' + (k === activeCat ? ' active' : '');
+    var name = k === 'all' ? 'ทั้งหมด' : DATA.labels[k][1];
+    btn.innerHTML = name + ' <span class="n">' + count + '</span>';
+    btn.onclick = function(){
+      activeCat = k;
+      renderFilters();
+      prev = null;
+      nextCard();
+      saveState();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      weights: cards.map(function(c){ return c.weight; }),
+      totalShown: totalShown, totalRight: totalRight, totalWrong: totalWrong,
+      activeCat: activeCat
+    }));
+  } catch(e){}
+}
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    var s = JSON.parse(raw);
+    if(!s || !s.weights || s.weights.length !== cards.length) return false;
+    for(var i=0;i<cards.length;i++) cards[i].weight = s.weights[i];
+    totalShown = s.totalShown || 0;
+    totalRight = s.totalRight || 0;
+    totalWrong = s.totalWrong || 0;
+    if(s.activeCat) activeCat = s.activeCat;
+    return true;
+  } catch(e){ return false; }
+}
+
+function initDeck(){
+  cards = DATA.cards.map(function(d){ return { name: d.name, cat: d.cat, desc: d.desc, weight: 1 }; });
+  totalShown = 0; totalRight = 0; totalWrong = 0;
+  current = null; prev = null;
+  loadState();
+  document.getElementById('deck-sub').textContent = 'ไวรัส · เชื้อรา · ปรสิต · ' + cards.length + ' ใบ';
+  renderFilters();
+  nextCard();
+}
+
+function pickNext(){
+  var pool = getPool();
+  if(pool.length === 0) return null;
+  var totalWeight = pool.reduce(function(s,c){ return s + c.weight; }, 0);
+  var card, tries = 0;
+  do {
+    var r = Math.random() * totalWeight;
+    var acc = 0;
+    for(var i=0;i<pool.length;i++){
+      acc += pool[i].weight;
+      if(r <= acc){ card = pool[i]; break; }
+    }
+    tries++;
+  } while(pool.length > 1 && card === prev && tries < 20);
+  return card;
+}
+
+function renderStats(){
+  document.getElementById('stat-total').textContent = totalShown;
+  document.getElementById('stat-right').textContent = totalRight;
+  document.getElementById('stat-wrong').textContent = totalWrong;
+  var attempts = totalRight + totalWrong;
+  var pctEl = document.getElementById('mastery-pct');
+  var fillEl = document.getElementById('mastery-fill');
+  if(attempts === 0){
+    pctEl.textContent = '–'; fillEl.style.width = '0%';
+  } else {
+    var pct = Math.round((totalRight / attempts) * 100);
+    pctEl.textContent = pct + '%'; fillEl.style.width = pct + '%';
+  }
+}
+
+function nextCard(){
+  prev = current;
+  current = pickNext();
+  totalShown++;
+  renderStats();
+
+  var label = DATA.labels[current.cat];
+  var tag = document.getElementById('cat-tag');
+  tag.textContent = label[1] + ' · ' + label[0];
+
+  document.getElementById('q-text').textContent = current.name;
+  document.getElementById('a-text').textContent = current.desc;
+  document.getElementById('answer').style.display = 'none';
+  document.getElementById('show-btn').style.display = 'inline-block';
+  document.getElementById('right-btn').style.display = 'none';
+  document.getElementById('wrong-btn').style.display = 'none';
+
+  var cardEl = document.getElementById('card');
+  cardEl.style.animation = 'none';
+  void cardEl.offsetWidth;
+  cardEl.style.animation = 'rise .35s ease';
+  saveState();
+}
+
+function reveal(){
+  if(document.getElementById('answer').style.display === 'block') return;
+  document.getElementById('answer').style.display = 'block';
+  document.getElementById('show-btn').style.display = 'none';
+  document.getElementById('right-btn').style.display = 'inline-block';
+  document.getElementById('wrong-btn').style.display = 'inline-block';
+}
+
+function markRight(){
+  if(document.getElementById('right-btn').style.display === 'none') return;
+  totalRight++;
+  current.weight = Math.max(current.weight * 0.5, MIN_W);
+  nextCard();
+}
+
+function markWrong(){
+  if(document.getElementById('wrong-btn').style.display === 'none') return;
+  totalWrong++;
+  current.weight = Math.min(current.weight * 2.5, MAX_W);
+  nextCard();
+}
+
+document.getElementById('show-btn').onclick = reveal;
+document.getElementById('right-btn').onclick = markRight;
+document.getElementById('wrong-btn').onclick = markWrong;
+var resetBtn = document.getElementById('restart-btn');
+var resetArmed = false;
+var resetTimer = null;
+resetBtn.onclick = function(){
+  if(!resetArmed){
+    resetArmed = true;
+    resetBtn.textContent = 'กดอีกครั้งเพื่อยืนยัน ⚠';
+    resetBtn.style.borderColor = 'var(--rust)';
+    resetBtn.style.color = 'var(--rust)';
+    resetTimer = setTimeout(function(){
+      resetArmed = false;
+      resetBtn.textContent = 'รีเซ็ตสถิติ ↻';
+      resetBtn.style.borderColor = '';
+      resetBtn.style.color = '';
+    }, 3000);
+    return;
+  }
+  clearTimeout(resetTimer);
+  resetArmed = false;
+  resetBtn.textContent = 'รีเซ็ตสถิติ ↻';
+  resetBtn.style.borderColor = '';
+  resetBtn.style.color = '';
+  try{ localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  activeCat = 'all';
+  initDeck();
+};
+
+document.addEventListener('keydown', function(e){
+  if(e.code === 'Space'){ e.preventDefault(); reveal(); }
+  else if(e.code === 'ArrowRight'){ e.preventDefault(); markRight(); }
+  else if(e.code === 'ArrowLeft'){ e.preventDefault(); markWrong(); }
+});
+
+initDeck();
+</script>
+</body>
+</html>
