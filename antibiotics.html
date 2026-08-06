@@ -37,7 +37,7 @@
   }
 
   #topbar{
-    width:100%; max-width:640px;
+    width:100%; max-width:680px;
     display:flex; justify-content:space-between; align-items:flex-end;
     margin-bottom:18px; gap:12px; flex-wrap:wrap;
   }
@@ -57,7 +57,7 @@
   }
   #restart-btn:hover{border-color:var(--teal); color:var(--teal-deep);}
 
-  #stats{width:100%; max-width:640px; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap;}
+  #stats{width:100%; max-width:680px; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap;}
   .stat-pill{
     font-size:11.5px; padding:5px 12px; border-radius:20px;
     background:var(--paper); border:1px solid var(--line); color:var(--sub);
@@ -66,7 +66,7 @@
     font-family:"Consolas","IBM Plex Mono",monospace; color:var(--ink); font-weight:600; font-size:12.5px;
   }
 
-  #mastery{width:100%; max-width:640px; margin-bottom:22px;}
+  #mastery{width:100%; max-width:680px; margin-bottom:22px;}
   #mastery .label{
     font-size:11px; color:var(--sub); margin-bottom:5px;
     display:flex; justify-content:space-between;
@@ -82,7 +82,7 @@
 
   #card{
     position:relative;
-    width:100%; max-width:640px;
+    width:100%; max-width:680px;
     background:var(--paper);
     border:1px solid var(--line);
     border-left:5px solid var(--teal);
@@ -118,12 +118,26 @@
     position:relative; z-index:1;
   }
   .answer-text{
-    font-size:14.5px; line-height:1.85; color:#2b3a33;
-    max-height:280px; overflow-y:auto; padding-right:6px;
+    font-size:14.5px; line-height:1.7; color:#2b3a33;
+    max-height:340px; overflow-y:auto; padding-right:8px;
   }
   .answer-text::-webkit-scrollbar{width:5px;}
   .answer-text::-webkit-scrollbar-thumb{background:rgba(23,45,35,.18); border-radius:3px;}
 
+
+  /* ---- structured answer rows ---- */
+  .row{ display:grid; grid-template-columns:104px 1fr; gap:10px; padding:7px 0; }
+  .row + .row{ border-top:1px solid rgba(23,45,35,.07); }
+  .row .k{
+    font-size:11.5px; font-weight:700; letter-spacing:.2px;
+    color:var(--teal-deep); background:var(--teal-soft);
+    border-radius:6px; padding:3px 8px; height:fit-content;
+    text-align:center; white-space:nowrap;
+  }
+  .row.warn .k{ color:#8a3d13; background:var(--rust-soft); }
+  .row .v{ font-size:14px; line-height:1.72; }
+  .row .v b{ color:var(--teal-deep); font-weight:700; }
+  .row.warn .v b{ color:var(--rust); }
   .btn-row{margin-top:auto; padding-top:24px; display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1;}
   .btn-row button{
     flex:1; min-width:120px; border:none; border-radius:12px;
@@ -137,9 +151,11 @@
   #right-btn{background:var(--teal);}
   #wrong-btn{background:var(--rust);}
 
-  @media (max-width:480px){
+  @media (max-width:520px){
     .question-text{font-size:21px;}
     #card{padding:26px 20px 22px;}
+    .row{ grid-template-columns:1fr; gap:3px; }
+    .row .k{ justify-self:start; }
   }
 </style>
 </head>
@@ -187,12 +203,378 @@
 </div>
 
 <script>
-const RAW = [{"name": "Penicillin G (Benzylpenicillin)", "desc": "กลุ่ม: Natural penicillin • ยา β-lactam ที่ยับยั้งการสร้างผนังเซลล์แบคทีเรีย • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม: spectrum แคบ เน้น เชื้อแกรมบวกรูปร่างกลม (Streptococci, Staphylococci ที่ไวต่อยา, Pneumococcus), Bacillus anthracis, Corynebacterium diphtheriae, Listeria spp., Treponema pallidum และ เชื้อ anaerobe ยกเว้น Bacteroides fragilis • ไม่ทนต่อ β-lactamase • ผ่าน blood-brain barrier ได้น้อย ยกเว้นเมื่อมีเยื่อหุ้มสมองอักเสบ • ผ่านรกได้ • ~60% จับกับโปรตีน • รูปแบบยา: ให้ทาง IV/IM ได้ และมีรูป benzathine กับ procaine ชนิดออกฤทธิ์ยาวสำหรับฉีด IM • ข้อบ่งใช้: การติดเชื้อ Streptococcus, เยื่อบุหัวใจอักเสบจากแบคทีเรีย, เยื่อหุ้มสมองอักเสบจาก meningococcus, คอตีบ และ การติดเชื้อ Treponema • ผลข้างเคียงที่สำคัญ ได้แก่ ผื่น แพ้รุนแรงหรือ anaphylaxis อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Penicillin V (Phenoxymethylpenicillin)", "desc": "กลุ่ม: Natural penicillin ชนิดรับประทาน • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม: spectrum แคบใกล้เคียง Penicillin G ครอบคลุม เชื้อแกรมบวก, เชื้อ spirochete และ anaerobe บางชนิด • ไม่ทนต่อเอนไซม์ β-lactamase • การรับประทาน: ยาไม่คงตัวในกรดตามเอกสาร จึงควรรับประทานก่อนอาหาร 1 ชั่วโมง หรือหลังอาหาร 2 ชั่วโมง • ข้อบ่งใช้: การติดเชื้อ Streptococcus และเชื้ออื่นที่ไวต่อ penicillin • ผลข้างเคียงที่สำคัญ ได้แก่ ผื่น แพ้รุนแรงหรือ anaphylaxis อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Cloxacillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent ทนต่อ penicillinase ที่สร้างจาก Staphylococcus • เชื้อที่ครอบคลุม: spectrum แคบ ได้แก่ MSSA, Staphylococcus epidermidis และ Streptococci บางชนิด • ผ่านเข้าสู่ CSF ได้น้อย และ ผ่าน BBB ได้ไม่ดี • จึงไม่เหมาะสำหรับรักษาเยื่อหุ้มสมองอักเสบ • ใช้รักษาติดเชื้อผิวหนังและการติดเชื้อ Staphylococcus ที่ไวต่อยา • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Dicloxacillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุมหลัก ๆ คือ MSSA, Staphylococcus epidermidis และ Streptococci บางชนิด • ไม่ถูกทำลายโดย penicillinase • ผ่านเข้าสู่ CSF ได้น้อย • จึงไม่ใช้รักษา เยื่อหุ้มสมองอักเสบ • ข้อบ่งใช้: การติดเชื้อผิวหนังและ Staphylococcus ที่ไวต่อยา • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Oxacillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม: เน้น MSSA รวมถึง Staphylococcus epidermidis และ Streptococci บางชนิด • ผ่าน BBB และ CSF ได้น้อย และ unsuitable for เยื่อหุ้มสมองอักเสบ • ใช้รักษา susceptible staphylococcal และ การติดเชื้อผิวหนัง • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Flucloxacillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ MSSA, Staphylococcus epidermidis และ Streptococci บางชนิด • Not inactivated by penicillinase • ผ่านเข้าสู่ CSF ได้น้อย • ใช้รักษาติดเชื้อผิวหนังและ Staphylococcus ที่ไวต่อยา • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Nafcillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Narrow activity against MSSA, Staphylococcus epidermidis และ Streptococci บางชนิด • ผ่านเข้าสู่ CSF ได้น้อย in the lecture summary • ใช้รักษาติดเชื้อ Staphylococcus ที่ไวต่อยา • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Methicillin", "desc": "กลุ่ม: Penicillin ที่ทนต่อ penicillinase และเน้นเชื้อ Staphylococcus • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Developed for penicillinase-producing Staphylococcus และ used conceptually to define methicillin-susceptible S • aureus (MSSA) • ผ่านเข้าสู่ CSF ได้น้อย • Resistance in MRSA is associated ร่วมกับ altered PBP2a • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Amoxicillin", "desc": "กลุ่ม: Aminopenicillin • broad-spectrum β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Positively charged amino group improves entry through เชื้อแกรมลบ porins • ครอบคลุม penicillin-susceptible Streptococci, Streptococcus viridans, Enterococcus spp • และ more เชื้อแกรมลบ than natural penicillins • ไม่ทนต่อ β-lactamase • Oral formulation • ข้อบ่งใช้: ear, nose และ throat infection, lower การติดเชื้อทางเดินหายใจ, genitourinary infection และ skin infection • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Ampicillin", "desc": "กลุ่ม: Aminopenicillin • broad-spectrum β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Oral/IV • ครอบคลุม susceptible Streptococci, S • viridans, Enterococcus spp • และ expanded เชื้อแกรมลบ • ไม่ทนต่อเอนไซม์ β-lactamase • ข้อบ่งใช้: ENT, lower respiratory, genitourinary และ การติดเชื้อผิวหนัง • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Carbenicillin", "desc": "กลุ่ม: Penicillin spectrum กว้างที่ครอบคลุม Pseudomonas • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Developed for resistant aerobic เชื้อแกรมลบ bacteria รวมถึง Pseudomonas • Uses listed: การติดเชื้อทางเดินปัสสาวะ, pelvic inflammatory disease, skin-structure infection, septicemia, ปอดอักเสบ และ osteomyelitis • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Ticarcillin", "desc": "กลุ่ม: Penicillin spectrum กว้างที่ครอบคลุม Pseudomonas • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Increased activity against resistant aerobic เชื้อแกรมลบ bacteria, รวมถึง Pseudomonas • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, pelvic inflammatory disease, skin-structure infection, septicemia, ปอดอักเสบ และ osteomyelitis • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Azlocillin", "desc": "กลุ่ม: Penicillin spectrum กว้างที่ครอบคลุม Pseudomonas • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ resistant aerobic เชื้อแกรมลบ รวมถึง Pseudomonas • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, pelvic inflammatory disease, skin-structure infection, septicemia, ปอดอักเสบ และ osteomyelitis • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Piperacillin", "desc": "กลุ่ม: Penicillin spectrum กว้างที่ครอบคลุม Pseudomonas • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ resistant aerobic เชื้อแกรมลบ bacteria รวมถึง Pseudomonas • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, pelvic inflammatory disease, skin-structure infection, septicemia, ปอดอักเสบ และ osteomyelitis • Often combined ร่วมกับ tazobactam • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Mezlocillin", "desc": "กลุ่ม: Penicillin spectrum กว้างที่ครอบคลุม Pseudomonas • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Extended เชื้อแกรมลบ aerobic coverage รวมถึง Pseudomonas • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, pelvic inflammatory disease, skin-structure infection, septicemia, ปอดอักเสบ และ osteomyelitis • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Clavulanic acid", "desc": "Traditional irreversible β-lactamase inhibitor • resembles a β-lactam และ protects partner antibiotics from enzymatic destruction • Oral or IV • มักใช้ร่วมกับ amoxicillin to broaden coverage against β-lactamase-producing bacteria • It is not primarily used alone as an antibacterial agent"}, {"name": "Sulbactam", "desc": "Irreversible β-lactamase inhibitor • oral or IV • มักใช้ร่วมกับ ampicillin • Ampicillin-sulbactam has broader coverage than amoxicillin-clavulanate in the lecture summary และ adds activity against Acinetobacter baumannii • Not primarily used alone"}, {"name": "Tazobactam", "desc": "Irreversible IV β-lactamase inhibitor • Most commonly combined ร่วมกับ piperacillin • piperacillin-tazobactam is described as the broadest combination in this group และ covers เชื้อแกรมบวก, เชื้อแกรมลบ และ anaerobic organisms • Also combined ร่วมกับ ceftolozane for anti-Pseudomonas และ ESBL coverage"}, {"name": "Avibactam", "desc": "Newer reversible non-β-lactam β-lactamase inhibitor • IV • Protects a partner β-lactam from β-lactamase-mediated destruction • Not used as stand-alone antibacterial therapy in the lecture summary"}, {"name": "Amoxicillin-clavulanate", "desc": "กลุ่ม: Aminopenicillin plus β-lactamase inhibitor • bactericidal และ time-dependent through the amoxicillin component • Broader than amoxicillin alone และ covers β-lactamase-producing bacteria • ข้อบ่งใช้: respiratory tract infection, หูชั้นกลางอักเสบ, sinusitis, ผิวหนังและเนื้อเยื่ออ่อน infection และ การติดเชื้อทางเดินปัสสาวะ • Class adverse effects include hypersensitivity และ GI disturbance • Listed as a community respiratory option"}, {"name": "Ampicillin-sulbactam", "desc": "กลุ่ม: Aminopenicillin plus β-lactamase inhibitor • broad-spectrum β-lactam combination • Broader than amoxicillin-clavulanate according to the lecture และ adds activity against Acinetobacter baumannii • Used as an alternative for anaerobic infection • β-lactam class adverse effects include hypersensitivity, GI disturbance และ nephritis"}, {"name": "Piperacillin-tazobactam", "desc": "Anti-pseudomonal penicillin plus β-lactamase inhibitor • broadest combination in this group • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และประสิทธิภาพขึ้นกับระยะเวลาที่ระดับยาสูงกว่า MIC Covers เชื้อแกรมบวก, เชื้อแกรมลบ รวมถึง Pseudomonas, และ เชื้อ anaerobe • ใช้รักษา serious polymicrobial infection และ listed as a first-line option for P • aeruginosa • β-lactam class adverse effects include hypersensitivity, GI disturbance และ nephritis"}, {"name": "Cephalexin", "desc": "First-generation cephalosporin • oral β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Good เชื้อแกรมบวก activity ร่วมกับ บางชนิด เชื้อแกรมลบ coverage • considered relatively narrow spectrum • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Cefazolin", "desc": "First-generation cephalosporin • IV β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Good เชื้อแกรมบวก และ บางชนิด เชื้อแกรมลบ activity • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Cefuroxime", "desc": "Second-generation cephalosporin • IV β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Increased เชื้อแกรมลบ coverage compared ร่วมกับ first generation • Identified in the lecture as the second-generation agent that crosses the BBB • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ อยู่ใน pregnancy category B"}, {"name": "Cefaclor", "desc": "Second-generation oral cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Increased เชื้อแกรมลบ coverage over first generation • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ อยู่ใน pregnancy category B"}, {"name": "Ceftriaxone", "desc": "Third-generation IV cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent มี spectrum กว้างและเด่นต่อ เชื้อแกรมลบ activity • Best CSF penetration in the lecture • first-line option for เยื่อหุ้มสมองอักเสบ • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ อยู่ใน pregnancy category B"}, {"name": "Ceftazidime", "desc": "Third-generation cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Broad เชื้อแกรมลบ activity ร่วมกับ anti-Pseudomonas activity • listed as a first-line option for P • aeruginosa • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Cefotaxime", "desc": "Third-generation IV cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent ครอบคลุมเชื้อได้กว้าง รวมถึง เชื้อแกรมลบ • option for เยื่อหุ้มสมองอักเสบ • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ อยู่ใน pregnancy category B"}, {"name": "Cefepime", "desc": "Fourth-generation IV cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Excellent เชื้อแกรมบวก และ เชื้อแกรมลบ activity • ใช้รักษา broad serious infections และ may be considered for resistant เชื้อแกรมลบ • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Ceftaroline", "desc": "Fifth-generation cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Distinguished by anti-MRSA activity • ผลข้างเคียงตามกลุ่ม β-lactam ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Ceftobiprole", "desc": "Fifth-generation cephalosporin • β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent Covers MRSA และ Pseudomonas according to the lecture summary • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Ceftolozane-tazobactam", "desc": "Fifth-generation cephalosporin/β-lactamase inhibitor combination • Strong anti-Pseudomonas activity และ ESBL coverage in the lecture summary • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และประสิทธิภาพขึ้นกับระยะเวลาที่ระดับยาสูงกว่า MIC ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Imipenem-cilastatin", "desc": "กลุ่ม: Carbapenem • ยา β-lactam ที่มี spectrum กว้างมาก • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ ESBL-producing organisms และ Pseudomonas aeruginosa • used for multidrug-resistant organisms • ผลข้างเคียงสำคัญ: propensity to cause seizures • อยู่ใน pregnancy category C"}, {"name": "Meropenem", "desc": "กลุ่ม: Carbapenem • ยา β-lactam ที่มี spectrum กว้างมาก • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ ESBL-producing organisms และ Pseudomonas • less CNS toxicity than imipenem และ may be used for เยื่อหุ้มสมองอักเสบ • อันตรกิริยาสำคัญ: avoid ร่วมกับ valproic acid because of seizure risk/reduced valproate effect • Pregnancy category B และ preferred carbapenem in the lecture • Dose adjustment may be needed in renal impairment"}, {"name": "Ertapenem", "desc": "กลุ่ม: Carbapenem • broad-spectrum β-lactam • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ ESBL-producing organisms but NOT Pseudomonas • ใช้รักษา resistant เชื้อแกรมลบ infection when Pseudomonas coverage is unnecessary • ผลข้างเคียงตามกลุ่ม ได้แก่ ภูมิแพ้ยา อาการทางทางเดินอาหาร และไตอักเสบ"}, {"name": "Aztreonam", "desc": "Monobactam β-lactam listed among ยาที่ยับยั้งการสร้างผนังเซลล์แบคทีเรียs • Bactericidal และ time-dependent as a β-lactam • อยู่ใน pregnancy category B เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะเรื่องเชื้อที่ครอบคลุม ข้อบ่งใช้ หรือผลข้างเคียงเพิ่มเติม นอกจากข้อมูลทั่วไปของกลุ่ม β-lactam"}, {"name": "Vancomycin", "desc": "Glycopeptide ยาที่ยับยั้งการสร้างผนังเซลล์แบคทีเรีย • binds D-alanine-D-alanine via hydrogen bonds • Described in the lecture as ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Narrow เชื้อแกรมบวก spectrum, รวมถึง most staphylococci และ MRSA • ineffective against เชื้อแกรมลบ และ เชื้อ anaerobe • Good CSF, lung และ extracellular-fluid penetration • half-life ~6 h • 55% จับกับโปรตีน • ขับออกทางไต • ข้อบ่งใช้: severe MRSA ปอดอักเสบ, endocarditis, osteomyelitis และ soft-tissue infection • oral vancomycin for C • difficile diarrhea • ผลข้างเคียง: red man syndrome (prevent ร่วมกับ slow infusion), reversible nephrotoxicity และ phlebitis • Loading dose และ therapeutic drug monitoring may be required • adjust in renal dysfunction • อยู่ใน pregnancy category C"}, {"name": "Gentamicin", "desc": "กลุ่ม: Aminoglycoside • จับกับ ribosome หน่วยย่อย 30S • bactericidal, concentration-dependent และ has PAE • ไม่ดูดซึมทางทางเดินอาหาร จึงต้องให้ทาง IV หรือ IM เมื่อต้องการผลทั่วร่างกาย เชื้อที่ครอบคลุม ได้แก่ P • aeruginosa, E • coli และ Klebsiella • listed for การติดเชื้อทางเดินหายใจ • Major ผลข้างเคียง: potentially permanent cochlear/vestibular ototoxicity และ usually reversible nephrotoxicity • Monitor hearing และ renal function • avoid or adjust in renal impairment"}, {"name": "Tobramycin", "desc": "กลุ่ม: Aminoglycoside • ยาที่ยับยั้งการสร้างโปรตีนโดยจับกับหน่วยย่อย 30S • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal ประสิทธิภาพขึ้นกับความเข้มข้น และมี post-antibiotic effect IV/IM for systemic effect because GI absorption is poor • ครอบคลุมหลัก ๆ คือ P • aeruginosa และ other เชื้อแกรมลบ • ผลข้างเคียงสำคัญคือพิษต่อหูและพิษต่อไต ควรติดตามการได้ยินและการทำงานของไต"}, {"name": "Streptomycin", "desc": "กลุ่ม: Aminoglycoside • 30S inhibitor • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal ประสิทธิภาพขึ้นกับความเข้มข้น และมี post-antibiotic effect Used against Mycobacterium tuberculosis • Not orally absorbed for systemic use • given parenterally • ผลข้างเคียงสำคัญคือพิษต่อหูและพิษต่อไต"}, {"name": "Amikacin", "desc": "กลุ่ม: Aminoglycoside • 30S inhibitor • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal ประสิทธิภาพขึ้นกับความเข้มข้น และมี post-antibiotic effect เชื้อที่ครอบคลุม ได้แก่ P • aeruginosa และ resistant organisms • Given IV/IM for systemic therapy • ผลข้างเคียงสำคัญคือพิษต่อหูซึ่งอาจถาวร และพิษต่อไตซึ่งมักกลับคืนได้ ควรติดตามการได้ยินและการทำงานของไต"}, {"name": "Kanamycin", "desc": "กลุ่ม: Aminoglycoside listed in the structural classification • As a class: จับกับ ribosome หน่วยย่อย 30S, bactericidal, concentration-dependent, has PAE และ is not absorbed through the GI tract for systemic effect • Class toxicities: ototoxicity และ nephrotoxicity • The lecture text does not specify individual indications"}, {"name": "Neomycin", "desc": "กลุ่ม: Aminoglycoside • 30S inhibitor • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น concentration-dependent เชื้อที่ครอบคลุม ได้แก่ เชื้อแกรมลบ bacilli และ บางชนิด เชื้อแกรมบวก • ใช้รักษา infected wounds และ burns • Class ผลข้างเคียง: ototoxicity และ nephrotoxicity"}, {"name": "Tetracycline", "desc": "กลุ่ม: Tetracycline • reversibly จับกับ ribosome หน่วยย่อย 30S และ blocks aminoacyl-tRNA binding • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Broad spectrum covering เชื้อแกรมบวก, เชื้อแกรมลบ, Rickettsia, Chlamydia, Mycoplasma, spirochetes และ เชื้อ anaerobe • การดูดซึมทางปากลดลงเมื่อรับประทานร่วมกับแคลเซียม เหล็ก แมกนีเซียม หรือยาลดกรด ข้อบ่งใช้: rickettsial infection, H • pylori combination therapy, chlamydial infection, acne และ periodontal disease • Contraindicated in pregnancy และ children <8 years because calcium chelation causes permanent tooth/bone discoloration และ enamel hypoplasia • อยู่ใน pregnancy category D"}, {"name": "Doxycycline", "desc": "กลุ่ม: Tetracycline • reversible 30S inhibitor • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Broad เชื้อแกรมบวก, เชื้อแกรมลบ และ atypical coverage • drug of choice for Rickettsia, ร่วมกับ activity against Chlamydia, Mycoplasma, spirochetes และ เชื้อ anaerobe • ข้อบ่งใช้: rickettsial infection, chlamydial infection, acne, periodontal disease และ H • pylori combination therapy • Oral absorption reduced by calcium, iron, magnesium และ antacids • ห้ามใช้ในหญิงตั้งครรภ์และเด็กอายุต่ำกว่า 8 ปี เพราะมีผลต่อฟันและกระดูก อยู่ใน pregnancy category D"}, {"name": "Minocycline", "desc": "กลุ่ม: Tetracycline • reversible 30S inhibitor • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic ครอบคลุมเชื้อได้กว้าง รวมถึง เชื้อแกรมบวก, เชื้อแกรมลบ และ atypical organisms • Uses in the lecture class include rickettsial, chlamydial และ acne-related indications • การดูดซึมทางปากลดลงเมื่อรับประทานร่วมกับแร่ธาตุหลายประจุ เช่น แคลเซียม เหล็ก และแมกนีเซียม ห้ามใช้ในหญิงตั้งครรภ์และเด็กอายุต่ำกว่า 8 ปี เพราะอาจทำให้ฟันและกระดูกเปลี่ยนสีถาวร รวมถึง enamel hypoplasia อยู่ใน pregnancy category D"}, {"name": "Erythromycin", "desc": "14-membered กลุ่ม Macrolide • จับกับ ribosome หน่วยย่อย 50S • usually bacteriostatic but may be bactericidal at high concentration • ครอบคลุม เชื้อแกรมบวก รวมถึง MSSA และ S • ปอดอักเสบe, selected เชื้อแกรมลบ, และ เชื้อ atypical such as Chlamydia, Mycoplasma, Rickettsia และ Legionella • ข้อบ่งใช้: penicillin-allergic patients, คอตีบ, pertussis, chancroid, การติดเชื้อทางเดินหายใจ, หูชั้นกลางอักเสบ, การติดเชื้อในอุ้งเชิงกราน และ โรคติดต่อทางเพศสัมพันธ์ • Strong CYP3A4 inhibitor • ผลข้างเคียง: GI upset, rare hypersensitivity, hepatotoxicity และ QT prolongation • ใช้ได้ค่อนข้างปลอดภัยในหญิงตั้งครรภ์ (category B) และให้นมบุตรได้"}, {"name": "Clarithromycin", "desc": "Semi-synthetic 14-membered กลุ่ม Macrolide • 50S inhibitor • โดยทั่วไปออกฤทธิ์แบบ bacteriostatic Broader than erythromycin ร่วมกับ better H • influenzae และ MSSA coverage • active against เชื้อ atypical และ MAC • ข้อบ่งใช้: H • pylori, Mycobacterium avium complex, Toxoplasma gondii และ การติดเชื้อทางเดินหายใจs • CYP1A2 inhibitor in the lecture summary • clinically important drug interactions • ผลข้างเคียง: GI upset, hypersensitivity, hepatotoxicity และ QT prolongation • อยู่ใน pregnancy category C"}, {"name": "Roxithromycin", "desc": "Semi-synthetic 14-membered กลุ่ม Macrolide • ยาที่ยับยั้งการสร้างโปรตีนโดยจับกับหน่วยย่อย 50S • โดยทั่วไปออกฤทธิ์แบบ bacteriostatic Class activity includes เชื้อแกรมบวก respiratory organisms และ เชื้อ atypical • Class uses include ทางเดินหายใจส่วนบนและส่วนล่าง infection, otitis, การติดเชื้อในอุ้งเชิงกราน และ โรคติดต่อทางเพศสัมพันธ์ • ผลข้างเคียงของกลุ่ม ได้แก่ คลื่นไส้ อาเจียน ไม่สบายท้อง อาการแพ้ ตับเป็นพิษ และ QT prolongation Individual details were not further specified in the lecture text"}, {"name": "Azithromycin", "desc": "15-membered azalide กลุ่ม Macrolide • จับกับ ribosome หน่วยย่อย 50S • โดยทั่วไปออกฤทธิ์แบบ bacteriostatic Broader than erythromycin • relatively stronger เชื้อแกรมลบ coverage และ active against เชื้อ atypical • Co-drug of choice for Chlamydia • also used for การติดเชื้อทางเดินหายใจ, หูชั้นกลางอักเสบ, การติดเชื้อในอุ้งเชิงกราน, โรคติดต่อทางเพศสัมพันธ์ และ MAC • Long half-life ~48 h • does not inhibit CYP enzymes in the lecture summary • ผลข้างเคียง: GI upset, rare hypersensitivity, hepatotoxicity และ QT prolongation • Pregnancy category B และ described as safe in pregnancy"}, {"name": "Midecamycin", "desc": "16-membered กลุ่ม Macrolide • 50S inhibitor • โดยทั่วไปออกฤทธิ์แบบ bacteriostatic Class spectrum includes เชื้อแกรมบวก respiratory organisms และ เชื้อ atypical • Class uses include respiratory, otitis, pelvic และ sexually transmitted infections • Class ผลข้างเคียง: GI upset, hypersensitivity, hepatotoxicity และ QT prolongation • เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะของยาตัวนี้"}, {"name": "Spiramycin", "desc": "16-membered กลุ่ม Macrolide • 50S inhibitor • โดยทั่วไปออกฤทธิ์แบบ bacteriostatic Class spectrum includes เชื้อแกรมบวก และ เชื้อ atypical • Class uses include respiratory, otitis, pelvic และ sexually transmitted infections • ผลข้างเคียงของกลุ่ม ได้แก่ อาการทางทางเดินอาหาร อาการแพ้ ตับเป็นพิษ และ QT prolongation เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะของยาตัวนี้"}, {"name": "Clindamycin", "desc": "กลุ่ม: Lincosamide • จับกับ ribosome หน่วยย่อย 50S • อาจเป็น bacteriostatic หรือ bactericidal ขึ้นกับชนิดเชื้อ และเป็น time-dependent เชื้อที่ครอบคลุม ได้แก่ many เชื้อแกรมบวก และ most obligate เชื้อ anaerobe • ineffective against เชื้อแกรมลบ • Oral bioavailability ~90% • widely distributed และ concentrates in tissue รวมถึง bone • ผ่านเข้าสู่ CSF ได้น้อย • hepatic metabolism ร่วมกับ urine/bile excretion • ข้อบ่งใช้: skin/skin-structure, กระดูกและข้อ, dental, intra-abdominal และ การติดเชื้อในอุ้งเชิงกรานs • Major ผลข้างเคียง: C • difficile-associated pseudomembranous colitis • also skin rash • อยู่ใน pregnancy category B"}, {"name": "Chloramphenicol", "desc": "Broad-spectrum ยาที่ยับยั้งการสร้างโปรตีนโดยจับกับหน่วยย่อย 50S • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Reserved for life-threatening infections when no safer alternatives exist • Severe ผลข้างเคียง: potentially fatal permanent aplastic anemia และ gray baby syndrome in neonates due to immature hepatic metabolism • Resistance mechanisms include acetyltransferase inactivation, efflux และ impermeability • อยู่ใน pregnancy category C"}, {"name": "Linezolid", "desc": "กลุ่ม: Oxazolidinone • จับกับ ribosome หน่วยย่อย 50S via 23S rRNA และ inhibits translation • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Strong เชื้อแกรมบวก activity against MSSA, MRSA, Streptococci, Enterococci รวมถึง VRE และ Nocardia • poor activity against เชื้อแกรมลบ และ เชื้อ anaerobe • ข้อบ่งใช้: vancomycin failure/intolerance, skin infection และ nosocomial ปอดอักเสบ • Hepatic elimination • no renal dose adjustment needed according to the lecture"}, {"name": "Tedizolid", "desc": "กลุ่ม: Oxazolidinone protein-synthesis inhibitor listed under 50S-targeting agents • Class mechanism is inhibition of bacterial translation • The provided lecture text does not give a specific spectrum, indication or adverse-effect profile for tedizolid"}, {"name": "Mupirocin", "desc": "Protein-synthesis inhibitor that targets bacterial isoleucyl-tRNA synthetase • The lecture text identifies the target but does not provide a detailed spectrum, indications, pharmacokinetics or adverse-effect profile"}, {"name": "Quinupristin-dalfopristin", "desc": "50S ribosomal protein-synthesis inhibitor listed in the mechanism table • เอกสารต้นฉบับไม่ได้ระบุเชื้อที่ครอบคลุม ข้อบ่งใช้ หรือผลข้างเคียงเพิ่มเติม"}, {"name": "Ciprofloxacin", "desc": "Second-generation กลุ่ม Fluoroกลุ่ม Quinolone • ยับยั้ง DNA gyrase ในเชื้อแกรมลบ และ topoisomerase IV ในเชื้อแกรมบวก • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal ประสิทธิภาพขึ้นกับความเข้มข้น และมี post-antibiotic effect Strong เชื้อแกรมลบ coverage รวมถึง Pseudomonas, ร่วมกับ บางชนิด เชื้อแกรมบวก และ atypical activity • ดูดซึมทางปากได้ดี และ high Vd ร่วมกับ penetration into bone, lung, prostate และ intracellular sites • ขับออกทางไต • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, prostatitis, respiratory, ทางเดินอาหารหรือช่องท้อง, กระดูกและข้อ และ ผิวหนังและเนื้อเยื่ออ่อน infections • ผลข้างเคียง: tendon rupture, cartilage damage, QT prolongation, rare seizures และ photosensitivity • Avoid in pregnancy และ patients <18 years per lecture • แคลเซียม เหล็ก แมกนีเซียม และยาลดกรดลดการดูดซึม จึงควรแยกเวลารับประทานอย่างน้อย 2 ชั่วโมง"}, {"name": "Norfloxacin", "desc": "Second-generation กลุ่ม Fluoroกลุ่ม Quinolone • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น concentration-dependent เชื้อแกรมลบ activity รวมถึง Pseudomonas, ร่วมกับ บางชนิด เชื้อแกรมบวก และ atypical coverage • Lower oral bioavailability than other กลุ่ม Fluoroกลุ่ม Quinolones in the lecture • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ และ prostatitis • ผลข้างเคียง: tendon rupture, cartilage damage, QT prolongation, rare seizures และ photosensitivity • Avoid <18 years และ use caution in pregnancy • Separate from polyvalent cations by ≥2 h"}, {"name": "Levofloxacin", "desc": "Third-generation กลุ่ม Fluoroกลุ่ม Quinolone • bactericidal และ concentration-dependent ร่วมกับ PAE • Retains เชื้อแกรมลบ activity และ has expanded เชื้อแกรมบวก และ atypical coverage • penetrates bone, lung และ prostate well • Renal elimination • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, prostatitis, respiratory, ทางเดินอาหารหรือช่องท้อง, กระดูกและข้อ และ ผิวหนังและเนื้อเยื่ออ่อน infection • ผลข้างเคียง: tendon rupture, cartilage injury, QT prolongation, rare seizures และ photosensitivity • ควรหลีกเลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี และอยู่ใน pregnancy category C ควรแยกเวลารับประทานจากแคลเซียม เหล็ก แมกนีเซียม และยาลดกรดอย่างน้อย 2 ชั่วโมง"}, {"name": "Moxifloxacin", "desc": "Third-generation กลุ่ม Fluoroกลุ่ม Quinolone • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal ประสิทธิภาพขึ้นกับความเข้มข้น และมี post-antibiotic effect Expanded เชื้อแกรมบวก และ atypical coverage ร่วมกับ broad tissue penetration • กำจัดผ่านตับ • ข้อบ่งใช้: respiratory, ทางเดินอาหารหรือช่องท้อง, กระดูกและข้อ และ ผิวหนังและเนื้อเยื่ออ่อน infections • ผลข้างเคียง: tendon rupture, cartilage damage, QT prolongation, rare seizures และ photosensitivity • ควรหลีกเลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี และอยู่ใน pregnancy category C การดูดซึมทางปากลดลงเมื่อรับประทานร่วมกับแร่ธาตุหลายประจุ เช่น แคลเซียม เหล็ก และแมกนีเซียม"}, {"name": "Sparfloxacin", "desc": "Third-generation กลุ่ม Fluoroกลุ่ม Quinolone • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น concentration-dependent Similar second-generation เชื้อแกรมลบ coverage ร่วมกับ extended เชื้อแกรมบวก และ atypical activity • Class uses include respiratory, การติดเชื้อทางเดินปัสสาวะ, prostatitis และ tissue infections • Class ผลข้างเคียง: tendon rupture, cartilage damage, QT prolongation, rare seizures และ photosensitivity • Avoid <18 years และ separate from cations"}, {"name": "Nalidixic acid", "desc": "First-generation กลุ่ม Quinolone • inhibits bacterial DNA synthesis • bactericidal • ครอบคลุมหลัก ๆ คือ เชื้อแกรมลบ but NOT Pseudomonas • Class adverse concerns include cartilage damage, tendon injury, QT prolongation, seizures และ photosensitivity • ควรหลีกเลี่ยงในผู้ที่อายุต่ำกว่า 18 ปีและหญิงตั้งครรภ์ตามข้อมูลในเอกสาร"}, {"name": "Cinoxacin", "desc": "First-generation กลุ่ม Quinolone • DNA-synthesis inhibitor • bactericidal • เชื้อแกรมลบ coverage without Pseudomonas activity • Class adverse concerns include tendon/cartilage toxicity, QT prolongation, rare seizures และ photosensitivity"}, {"name": "Trovafloxacin", "desc": "Fourth-generation กลุ่ม Fluoroกลุ่ม Quinolone • ออกฤทธิ์ฆ่าเชื้อแบบ bactericidal และเป็น concentration-dependent Similar activity to third generation ร่วมกับ added broad anaerobic coverage • Class uses include respiratory, abdominal, กระดูกและข้อ และ ผิวหนังและเนื้อเยื่ออ่อน infection • Class ผลข้างเคียง: tendon rupture, cartilage damage, QT prolongation, seizures และ photosensitivity • ควรหลีกเลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี และอยู่ใน pregnancy category C"}, {"name": "Rifampin (Rifampicin)", "desc": "Rifamycin that inhibits bacterial RNA synthesis • bactericidal • Demonstrates PAE as a protein/nucleic-acid synthesis inhibitor in the general framework • Resistance commonly occurs through target modification of rpoB • เอกสารต้นฉบับไม่ได้ระบุข้อบ่งใช้และผลข้างเคียงอย่างละเอียด"}, {"name": "Sulfamethoxazole", "desc": "Sulfonamide • PABA analogue that inhibits dihydropteroate synthase และ folate synthesis • bacteriostatic alone • Combined ร่วมกับ trimethoprim for sequential folate blockade และ bactericidal synergy • ผ่านรกได้ • risk of neonatal kernicterus • ADRs include nausea/vomiting, hypersensitivity, rash, fever, eosinophilia, Stevens-Johnson syndrome, hepatotoxicity, bone-marrow suppression และ hemolysis in G6PD deficiency • Acetylation may cause crystalluria • encourage hydration"}, {"name": "Trimethoprim", "desc": "Folate-pathway inhibitor • bacteriostatic alone และ synergistically bactericidal ร่วมกับ sulfamethoxazole through sequential folate blockade • Used in a 1:5 TMP:SMX ratio • ผ่านรกได้ และ breast milk • Combination uses include การติดเชื้อทางเดินปัสสาวะ, bronchitis, eye/ear infection, เยื่อหุ้มสมองอักเสบ, ปอดอักเสบ และ Pneumocystis jirovecii prevention/treatment • Combination adverse effects include rash, SJS, marrow suppression และ kernicterus risk"}, {"name": "Trimethoprim-sulfamethoxazole (Co-trimoxazole)", "desc": "Sequential folate-synthesis inhibitor • TMP:SMX ratio 1:5 • synergistic bactericidal combination • ครอบคลุม เชื้อแกรมบวก และ เชื้อแกรมลบ และ is critical for prevention และ treatment of Pneumocystis jirovecii ปอดอักเสบ • poor anaerobic activity • ดูดซึมทางปากได้ดี และ widely distributed • ผ่านรกได้ และ breast milk • ข้อบ่งใช้: การติดเชื้อทางเดินปัสสาวะ, bronchitis, eye/ear infections, bacterial เยื่อหุ้มสมองอักเสบ, ปอดอักเสบ, PCP และ severe burns • ผลข้างเคียง: nausea/vomiting, hypersensitivity, rash, fever, eosinophilia, Stevens-Johnson syndrome, kernicterus, hepatotoxicity, bone-marrow suppression และ G6PD-related hemolysis • May cause crystalluria • drink more water • อยู่ใน pregnancy category C"}, {"name": "Metronidazole", "desc": "กลุ่ม: Nitroimidazole • antiprotozoal และ antibacterial against เชื้อ anaerobe • bactericidal by causing helical DNA destruction • Oral bioavailability ~80%, protein binding <20%, wide distribution, therapeutic CSF levels และ good abscess penetration • hepatic metabolism และ CYP2C9 inhibition • half-life ~8 h, prolonged in hepatic impairment • โดยหลัก urinary excretion • ข้อบ่งใช้: anaerobic intra-abdominal infection, brain abscess, C • difficile colitis, H • pylori combination therapy, amebiasis, giardiasis และ vaginitis • ผลข้างเคียง: disulfiram-like reaction ร่วมกับ alcohol และ dark urine • Avoid alcohol during และ after treatment • อยู่ใน pregnancy category B"}, {"name": "Nitrofurantoin", "desc": "Urinary antibacterial • causes bacterial DNA damage • ออกฤทธิ์ยับยั้งการเจริญของเชื้อแบบ bacteriostatic Activity described as limited to E • coli in the lecture • ใช้รักษา uncomplicated การติดเชื้อทางเดินปัสสาวะ • เอกสารต้นฉบับไม่ได้ระบุข้อมูล PK หรือผลข้างเคียงเพิ่มเติม"}, {"name": "Daptomycin", "desc": "Lipopeptide causing bacterial cellular-membrane dysfunction • Listed as an alternative for MRSA infection • The lecture text does not provide detailed spectrum, pharmacokinetics or adverse effects"}, {"name": "Teicoplanin", "desc": "Glycopeptide ยาที่ยับยั้งการสร้างผนังเซลล์แบคทีเรีย listed ร่วมกับ vancomycin • เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัวเรื่องเชื้อที่ครอบคลุม ข้อบ่งใช้ เภสัชจลนศาสตร์ หรือผลข้างเคียง"}, {"name": "Polymyxins", "desc": "Antibacterial class associated ร่วมกับ target/membrane modification resistance, รวมถึง the PhoP-PhoQ system • เอกสารต้นฉบับไม่ได้ระบุชื่อยารายตัว ข้อบ่งใช้ หรือผลข้างเคียงอย่างละเอียด"}];
+const RAW = [];
+function add(name, o){ o.name = name; RAW.push(o); }
 
-// each card carries a weight controlling how often it resurfaces.
-// wrong answers raise the weight a lot; right answers lower it -
-// net effect: cards you get wrong show up much more often than ones you get right.
-let cards = RAW.map(function(d){ return { name: d.name, desc: d.desc, weight: 1 }; });
+const PEN_ADR  = "ผื่น, แพ้รุนแรง (anaphylaxis), อาการทางเดินอาหาร, ไตอักเสบ";
+const PEN_B    = "Pregnancy category B — ใช้ได้ค่อนข้างปลอดภัย และให้นมบุตรได้";
+const CIDAL_T  = "ยับยั้งการสร้างผนังเซลล์ • ฆ่าเชื้อ (bactericidal) • ประสิทธิภาพขึ้นกับ<b>ระยะเวลา</b>ที่ระดับยาสูงกว่า MIC (time-dependent)";
+const CEPH_ADR = "ภูมิแพ้ยา, อาการทางเดินอาหาร, ไตอักเสบ";
+
+/* ---------- Natural penicillins ---------- */
+add("Penicillin G (Benzylpenicillin)", {
+  group:"Natural penicillin (β-lactam)", mech:CIDAL_T,
+  spectrum:"แคบ — แกรมบวกรูปกลม (Streptococci, Staphylococci ที่ไวยา, Pneumococcus), Bacillus anthracis, Corynebacterium diphtheriae, Listeria spp., Treponema pallidum และ anaerobe ยกเว้น Bacteroides fragilis • <b>ไม่ทน</b> β-lactamase",
+  pk:"ผ่าน BBB ได้น้อย (ดีขึ้นเมื่อมีเยื่อหุ้มสมองอักเสบ) • ผ่านรกได้ • จับโปรตีน ~60% • ให้ IV/IM; มีรูป benzathine และ procaine ออกฤทธิ์ยาวสำหรับฉีด IM",
+  uses:"ติดเชื้อ Streptococcus, เยื่อบุหัวใจอักเสบ, เยื่อหุ้มสมองอักเสบจาก meningococcus, คอตีบ, ซิฟิลิส",
+  adr:PEN_ADR, note:PEN_B });
+
+add("Penicillin V (Phenoxymethylpenicillin)", {
+  group:"Natural penicillin ชนิดกิน (β-lactam)", mech:CIDAL_T,
+  spectrum:"แคบ ใกล้เคียง Penicillin G — แกรมบวก, spirochete และ anaerobe บางชนิด • <b>ไม่ทน</b> β-lactamase",
+  pk:"ยาไม่คงตัวในกรด — กินก่อนอาหาร 1 ชม. หรือหลังอาหาร 2 ชม.",
+  uses:"ติดเชื้อ Streptococcus และเชื้ออื่นที่ไวต่อ penicillin",
+  adr:PEN_ADR, note:PEN_B });
+
+/* ---------- Penicillinase-resistant (anti-staph) ---------- */
+const ARS_G  = "Penicillinase-resistant penicillin (anti-staphylococcal)";
+const ARS_S  = "แคบ — MSSA, Staphylococcus epidermidis และ Streptococci บางชนิด • <b>ทน</b> penicillinase จาก Staphylococcus";
+const ARS_PK = "ผ่าน BBB / CSF ได้น้อย → <b>ไม่ใช้</b>รักษาเยื่อหุ้มสมองอักเสบ";
+["Cloxacillin","Dicloxacillin","Oxacillin","Flucloxacillin","Nafcillin"].forEach(function(n){
+  add(n, { group:ARS_G, mech:CIDAL_T, spectrum:ARS_S, pk:ARS_PK,
+    uses:"ติดเชื้อผิวหนัง และการติดเชื้อ Staphylococcus ที่ไวต่อยา", adr:PEN_ADR });
+});
+add("Methicillin", {
+  group:ARS_G, mech:CIDAL_T,
+  spectrum:ARS_S + " • เป็นตัวนิยาม MSSA (methicillin-susceptible S. aureus)",
+  pk:ARS_PK, uses:"ปัจจุบันใช้อ้างอิงทางห้องปฏิบัติการเป็นหลัก", adr:PEN_ADR,
+  note:"การดื้อยาใน MRSA เกิดจาก PBP2a ที่เปลี่ยนแปลงไป" });
+
+/* ---------- Aminopenicillins ---------- */
+add("Amoxicillin", {
+  group:"Aminopenicillin (broad-spectrum β-lactam)", mech:CIDAL_T,
+  spectrum:"หมู่ amino ประจุบวกช่วยให้ผ่าน porin ของแกรมลบได้ดีขึ้น → ครอบคลุม Streptococci ที่ไวต่อ penicillin, S. viridans, Enterococcus spp. และแกรมลบได้กว้างกว่า natural penicillin • <b>ไม่ทน</b> β-lactamase",
+  pk:"รูปแบบกิน",
+  uses:"หู คอ จมูก, ติดเชื้อทางเดินหายใจส่วนล่าง, ทางเดินปัสสาวะและอวัยวะสืบพันธุ์, ผิวหนัง",
+  adr:PEN_ADR, note:PEN_B });
+
+add("Ampicillin", {
+  group:"Aminopenicillin (broad-spectrum β-lactam)", mech:CIDAL_T,
+  spectrum:"Streptococci ที่ไวต่อยา, S. viridans, Enterococcus spp. และแกรมลบกว้างขึ้น • <b>ไม่ทน</b> β-lactamase",
+  pk:"ให้ได้ทั้งกินและ IV",
+  uses:"หู คอ จมูก, ทางเดินหายใจส่วนล่าง, ทางเดินปัสสาวะและอวัยวะสืบพันธุ์, ผิวหนัง",
+  adr:PEN_ADR, note:PEN_B });
+
+/* ---------- Antipseudomonal penicillins ---------- */
+const APS_G = "Antipseudomonal penicillin (β-lactam spectrum กว้าง)";
+const APS_U = "ทางเดินปัสสาวะ, อุ้งเชิงกรานอักเสบ, ผิวหนังและเนื้อเยื่อ, ติดเชื้อในกระแสเลือด, ปอดอักเสบ, กระดูกอักเสบ";
+[["Carbenicillin",""],["Ticarcillin",""],["Azlocillin",""],
+ ["Piperacillin"," • มักใช้ร่วมกับ tazobactam"],["Mezlocillin",""]].forEach(function(p){
+  add(p[0], { group:APS_G, mech:CIDAL_T,
+    spectrum:"แกรมลบชนิด aerobe ที่ดื้อยา รวมถึง <b>Pseudomonas</b>" + p[1],
+    uses:APS_U, adr:PEN_ADR });
+});
+
+/* ---------- β-lactamase inhibitors ---------- */
+add("Clavulanic acid", {
+  group:"β-lactamase inhibitor (ชนิดผันกลับไม่ได้)",
+  mech:"โครงสร้างคล้าย β-lactam เข้าไปจับเอนไซม์แทน จึงปกป้องยาคู่จากการถูกทำลาย",
+  spectrum:"ไม่ใช้เดี่ยวเป็นยาฆ่าเชื้อ", pk:"กินหรือ IV",
+  uses:"จับคู่กับ amoxicillin เพื่อขยายฤทธิ์ครอบคลุมเชื้อที่สร้าง β-lactamase" });
+
+add("Sulbactam", {
+  group:"β-lactamase inhibitor (ชนิดผันกลับไม่ได้)",
+  mech:"จับเอนไซม์ β-lactamase ปกป้องยาคู่", spectrum:"ไม่ใช้เดี่ยว", pk:"กินหรือ IV",
+  uses:"จับคู่กับ ampicillin • เพิ่มฤทธิ์ต่อ <b>Acinetobacter baumannii</b>" });
+
+add("Tazobactam", {
+  group:"β-lactamase inhibitor (ชนิดผันกลับไม่ได้)",
+  mech:"จับเอนไซม์ β-lactamase ปกป้องยาคู่", spectrum:"ไม่ใช้เดี่ยว", pk:"ให้ IV",
+  uses:"จับคู่กับ piperacillin (สูตรกว้างที่สุดในกลุ่ม ครอบคลุมแกรมบวก แกรมลบ และ anaerobe) • และจับคู่กับ ceftolozane เพื่อคุม Pseudomonas และ ESBL" });
+
+add("Avibactam", {
+  group:"β-lactamase inhibitor รุ่นใหม่ (non-β-lactam, ผันกลับได้)",
+  mech:"จับเอนไซม์ β-lactamase ปกป้องยาคู่", spectrum:"ไม่ใช้เดี่ยว", pk:"ให้ IV" });
+
+/* ---------- Combinations ---------- */
+add("Amoxicillin-clavulanate", {
+  group:"Aminopenicillin + β-lactamase inhibitor", mech:CIDAL_T,
+  spectrum:"กว้างกว่า amoxicillin เดี่ยว — ครอบคลุมเชื้อที่สร้าง β-lactamase",
+  uses:"ทางเดินหายใจ, หูชั้นกลางอักเสบ, ไซนัสอักเสบ, ผิวหนังและเนื้อเยื่ออ่อน, ทางเดินปัสสาวะ",
+  adr:PEN_ADR, note:"ตัวเลือกหลักสำหรับติดเชื้อทางเดินหายใจในชุมชน" });
+
+add("Ampicillin-sulbactam", {
+  group:"Aminopenicillin + β-lactamase inhibitor", mech:CIDAL_T,
+  spectrum:"กว้างกว่า amoxicillin-clavulanate • เพิ่มฤทธิ์ต่อ <b>Acinetobacter baumannii</b>",
+  uses:"ทางเลือกสำหรับติดเชื้อ anaerobe", adr:PEN_ADR });
+
+add("Piperacillin-tazobactam", {
+  group:"Antipseudomonal penicillin + β-lactamase inhibitor", mech:CIDAL_T,
+  spectrum:"<b>กว้างที่สุดในกลุ่ม</b> — แกรมบวก, แกรมลบ (รวม Pseudomonas) และ anaerobe",
+  uses:"ติดเชื้อรุนแรงหลายเชื้อร่วมกัน • ตัวเลือกแรกสำหรับ P. aeruginosa", adr:PEN_ADR });
+
+/* ---------- Cephalosporins ---------- */
+add("Cephalexin", { group:"Cephalosporin รุ่นที่ 1 (กิน)", mech:CIDAL_T,
+  spectrum:"แกรมบวกดี + แกรมลบบางชนิด • spectrum ค่อนข้างแคบ", adr:CEPH_ADR, note:PEN_B });
+add("Cefazolin", { group:"Cephalosporin รุ่นที่ 1 (IV)", mech:CIDAL_T,
+  spectrum:"แกรมบวกดี + แกรมลบบางชนิด", adr:CEPH_ADR, note:PEN_B });
+add("Cefuroxime", { group:"Cephalosporin รุ่นที่ 2 (IV)", mech:CIDAL_T,
+  spectrum:"แกรมลบกว้างขึ้นกว่ารุ่นที่ 1", pk:"<b>รุ่นที่ 2 ตัวเดียวที่ผ่าน BBB ได้</b>",
+  adr:CEPH_ADR, note:"Pregnancy category B" });
+add("Cefaclor", { group:"Cephalosporin รุ่นที่ 2 (กิน)", mech:CIDAL_T,
+  spectrum:"แกรมลบกว้างขึ้นกว่ารุ่นที่ 1", adr:CEPH_ADR, note:"Pregnancy category B" });
+add("Ceftriaxone", { group:"Cephalosporin รุ่นที่ 3 (IV)", mech:CIDAL_T,
+  spectrum:"กว้าง เด่นที่แกรมลบ", pk:"<b>ผ่านเข้า CSF ได้ดีที่สุดในกลุ่ม</b>",
+  uses:"ตัวเลือกแรกสำหรับเยื่อหุ้มสมองอักเสบ", adr:CEPH_ADR, note:"Pregnancy category B" });
+add("Ceftazidime", { group:"Cephalosporin รุ่นที่ 3", mech:CIDAL_T,
+  spectrum:"แกรมลบกว้าง + มีฤทธิ์ต่อ <b>Pseudomonas</b>",
+  uses:"ตัวเลือกแรกสำหรับ P. aeruginosa", adr:CEPH_ADR });
+add("Cefotaxime", { group:"Cephalosporin รุ่นที่ 3 (IV)", mech:CIDAL_T,
+  spectrum:"กว้าง รวมแกรมลบ", uses:"ทางเลือกสำหรับเยื่อหุ้มสมองอักเสบ",
+  adr:CEPH_ADR, note:"Pregnancy category B" });
+add("Cefepime", { group:"Cephalosporin รุ่นที่ 4 (IV)", mech:CIDAL_T,
+  spectrum:"แกรมบวกและแกรมลบดีเยี่ยมทั้งคู่",
+  uses:"ติดเชื้อรุนแรง • พิจารณาใช้กับแกรมลบที่ดื้อยา", adr:CEPH_ADR });
+add("Ceftaroline", { group:"Cephalosporin รุ่นที่ 5", mech:CIDAL_T,
+  spectrum:"จุดเด่นคือมีฤทธิ์ต่อ <b>MRSA</b>", adr:CEPH_ADR });
+add("Ceftobiprole", { group:"Cephalosporin รุ่นที่ 5", mech:CIDAL_T,
+  spectrum:"ครอบคลุมทั้ง <b>MRSA</b> และ <b>Pseudomonas</b>", adr:CEPH_ADR });
+add("Ceftolozane-tazobactam", { group:"Cephalosporin รุ่นที่ 5 + β-lactamase inhibitor", mech:CIDAL_T,
+  spectrum:"ฤทธิ์ต่อ <b>Pseudomonas</b> แรง และครอบคลุม <b>ESBL</b>", adr:CEPH_ADR });
+
+/* ---------- Carbapenems / monobactam ---------- */
+add("Imipenem-cilastatin", { group:"Carbapenem (β-lactam spectrum กว้างมาก)", mech:CIDAL_T,
+  spectrum:"รวม <b>ESBL</b> และ <b>Pseudomonas aeruginosa</b>",
+  uses:"เชื้อดื้อยาหลายขนาน (MDR)", adr:"<b>ชักได้ง่ายกว่าตัวอื่นในกลุ่ม</b>",
+  note:"Pregnancy category C" });
+add("Meropenem", { group:"Carbapenem (β-lactam spectrum กว้างมาก)", mech:CIDAL_T,
+  spectrum:"รวม <b>ESBL</b> และ <b>Pseudomonas</b>",
+  pk:"พิษต่อระบบประสาทน้อยกว่า imipenem → ใช้ในเยื่อหุ้มสมองอักเสบได้ • ปรับขนาดยาเมื่อไตบกพร่อง",
+  adr:"อันตรกิริยาสำคัญ: <b>เลี่ยงใช้ร่วมกับ valproic acid</b> (เสี่ยงชัก / ลดระดับ valproate)",
+  note:"Pregnancy category B — เป็น carbapenem ที่แนะนำ" });
+add("Ertapenem", { group:"Carbapenem (β-lactam spectrum กว้าง)", mech:CIDAL_T,
+  spectrum:"รวม <b>ESBL</b> แต่ <b>ไม่ครอบคลุม Pseudomonas</b>",
+  uses:"แกรมลบดื้อยาที่ไม่ต้องคุม Pseudomonas", adr:CEPH_ADR });
+add("Aztreonam", { group:"Monobactam (β-lactam)", mech:CIDAL_T,
+  spectrum:"ตามคุณสมบัติทั่วไปของกลุ่ม β-lactam",
+  note:"Pregnancy category B • เอกสารต้นฉบับไม่ได้ให้รายละเอียดเพิ่มเติม" });
+
+/* ---------- Glycopeptides ---------- */
+add("Vancomycin", {
+  group:"Glycopeptide (ยับยั้งการสร้างผนังเซลล์)",
+  mech:"จับกับปลาย D-alanine-D-alanine ด้วยพันธะไฮโดรเจน • ยับยั้งการเจริญ (bacteriostatic ตามเอกสาร)",
+  spectrum:"แคบ เน้นแกรมบวก — staphylococci ส่วนใหญ่ รวม <b>MRSA</b> • <b>ไม่ได้ผล</b>กับแกรมลบและ anaerobe",
+  pk:"ผ่านเข้า CSF, ปอด และของเหลวนอกเซลล์ได้ดี • ค่าครึ่งชีวิต ~6 ชม. • จับโปรตีน 55% • ขับทางไต",
+  uses:"ปอดอักเสบจาก MRSA รุนแรง, เยื่อบุหัวใจอักเสบ, กระดูกอักเสบ, เนื้อเยื่ออ่อน • ชนิด<b>กิน</b>ใช้รักษาท้องเสียจาก C. difficile",
+  adr:"<b>Red man syndrome</b> (ป้องกันด้วยการหยดยาช้า ๆ), พิษต่อไตแบบกลับคืนได้, หลอดเลือดดำอักเสบ",
+  note:"อาจต้องให้ loading dose และเจาะระดับยา (TDM) • ปรับขนาดเมื่อไตบกพร่อง • Pregnancy category C" });
+add("Teicoplanin", { group:"Glycopeptide (ยับยั้งการสร้างผนังเซลล์)",
+  mech:"กลไกเดียวกับ vancomycin", spectrum:"จัดอยู่กลุ่มเดียวกับ vancomycin",
+  note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัว" });
+
+/* ---------- Aminoglycosides ---------- */
+const AG_M   = "จับกับไรโบโซม<b>หน่วยย่อย 30S</b> • ฆ่าเชื้อ (bactericidal) • ประสิทธิภาพขึ้นกับ<b>ความเข้มข้น</b> • มี post-antibiotic effect (PAE)";
+const AG_PK  = "<b>ไม่ดูดซึมทางทางเดินอาหาร</b> → ต้องให้ IV หรือ IM เมื่อต้องการผลทั่วร่างกาย";
+const AG_ADR = "<b>พิษต่อหู</b> (หูชั้นในและการทรงตัว — อาจถาวร) และ<b>พิษต่อไต</b> (มักกลับคืนได้) • ติดตามการได้ยินและการทำงานของไต";
+add("Gentamicin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"P. aeruginosa, E. coli, Klebsiella", pk:AG_PK,
+  uses:"ติดเชื้อทางเดินหายใจ", adr:AG_ADR, note:"เลี่ยงหรือปรับขนาดเมื่อไตบกพร่อง" });
+add("Tobramycin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"เน้น P. aeruginosa และแกรมลบอื่น ๆ", pk:AG_PK, adr:AG_ADR });
+add("Streptomycin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"<b>Mycobacterium tuberculosis</b>", pk:AG_PK, adr:AG_ADR });
+add("Amikacin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"P. aeruginosa และเชื้อดื้อยา", pk:AG_PK, adr:AG_ADR });
+add("Kanamycin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"ตามคุณสมบัติของกลุ่ม", pk:AG_PK, adr:AG_ADR,
+  note:"เอกสารต้นฉบับไม่ได้ระบุข้อบ่งใช้เฉพาะตัว" });
+add("Neomycin", { group:"Aminoglycoside", mech:AG_M,
+  spectrum:"แกรมลบรูปแท่ง และแกรมบวกบางชนิด",
+  uses:"แผลติดเชื้อและแผลไฟไหม้ (ใช้เฉพาะที่)", adr:AG_ADR });
+
+/* ---------- Tetracyclines ---------- */
+const TET_M  = "จับไรโบโซม<b>หน่วยย่อย 30S</b> แบบผันกลับได้ ขวางการเข้าจับของ aminoacyl-tRNA • ยับยั้งการเจริญ (bacteriostatic)";
+const TET_PK = "<b>การดูดซึมลดลง</b>เมื่อกินร่วมกับแคลเซียม เหล็ก แมกนีเซียม หรือยาลดกรด";
+const TET_CI = "<b>ห้ามใช้</b>ในหญิงตั้งครรภ์และเด็กอายุต่ำกว่า 8 ปี — จับแคลเซียมทำให้ฟันและกระดูกเปลี่ยนสีถาวร และเคลือบฟันไม่สมบูรณ์ • Pregnancy category D";
+add("Tetracycline", { group:"Tetracycline", mech:TET_M,
+  spectrum:"กว้าง — แกรมบวก, แกรมลบ, Rickettsia, Chlamydia, Mycoplasma, spirochete และ anaerobe",
+  pk:TET_PK, uses:"ติดเชื้อ Rickettsia, สูตรร่วมกำจัด H. pylori, Chlamydia, สิว, โรคปริทันต์", note:TET_CI });
+add("Doxycycline", { group:"Tetracycline", mech:TET_M,
+  spectrum:"กว้าง — แกรมบวก, แกรมลบ และเชื้อ atypical • <b>ยาตัวเลือกแรกสำหรับ Rickettsia</b> • ครอบคลุม Chlamydia, Mycoplasma, spirochete, anaerobe",
+  pk:TET_PK, uses:"ติดเชื้อ Rickettsia, Chlamydia, สิว, โรคปริทันต์, สูตรร่วมกำจัด H. pylori", note:TET_CI });
+add("Minocycline", { group:"Tetracycline", mech:TET_M,
+  spectrum:"กว้าง — แกรมบวก, แกรมลบ และเชื้อ atypical",
+  pk:TET_PK, uses:"ติดเชื้อ Rickettsia, Chlamydia และสิว", note:TET_CI });
+
+/* ---------- Macrolides ---------- */
+const MAC_ADR = "อาการทางเดินอาหาร (คลื่นไส้ อาเจียน ไม่สบายท้อง), อาการแพ้ (พบน้อย), พิษต่อตับ, <b>QT prolongation</b>";
+const MAC_50  = "จับไรโบโซม<b>หน่วยย่อย 50S</b> • ยับยั้งการเจริญ (bacteriostatic)";
+add("Erythromycin", { group:"Macrolide วง 14 เหลี่ยม",
+  mech:"จับไรโบโซม<b>หน่วยย่อย 50S</b> • ปกติยับยั้งการเจริญ (bacteriostatic) แต่อาจฆ่าเชื้อได้ที่ความเข้มข้นสูง",
+  spectrum:"แกรมบวกรวม MSSA และ <b>S. pneumoniae</b>, แกรมลบบางชนิด และเชื้อ atypical (Chlamydia, Mycoplasma, Rickettsia, Legionella)",
+  uses:"ผู้ป่วยแพ้ penicillin, คอตีบ, ไอกรน, แผลริมอ่อน, ติดเชื้อทางเดินหายใจ, หูชั้นกลางอักเสบ, อุ้งเชิงกรานอักเสบ, โรคติดต่อทางเพศสัมพันธ์",
+  adr:MAC_ADR, note:"<b>ยับยั้ง CYP3A4 อย่างแรง</b> — ระวังอันตรกิริยา • Pregnancy category B" });
+add("Clarithromycin", { group:"Macrolide กึ่งสังเคราะห์ วง 14 เหลี่ยม", mech:MAC_50,
+  spectrum:"กว้างกว่า erythromycin — ครอบคลุม H. influenzae และ MSSA ดีขึ้น • มีฤทธิ์ต่อเชื้อ atypical และ <b>MAC</b>",
+  uses:"H. pylori, Mycobacterium avium complex, Toxoplasma gondii, ติดเชื้อทางเดินหายใจ",
+  adr:MAC_ADR, note:"ยับยั้ง CYP1A2 — มีอันตรกิริยาที่สำคัญทางคลินิก • Pregnancy category C" });
+add("Roxithromycin", { group:"Macrolide กึ่งสังเคราะห์ วง 14 เหลี่ยม", mech:MAC_50,
+  spectrum:"แกรมบวกในทางเดินหายใจ และเชื้อ atypical",
+  uses:"ทางเดินหายใจส่วนบนและล่าง, หูชั้นกลางอักเสบ, อุ้งเชิงกรานอักเสบ, โรคติดต่อทางเพศสัมพันธ์",
+  adr:MAC_ADR, note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัว" });
+add("Azithromycin", { group:"Azalide วง 15 เหลี่ยม (กลุ่ม Macrolide)", mech:MAC_50,
+  spectrum:"กว้างกว่า erythromycin • ครอบคลุมแกรมลบได้ดีกว่าเชิงเปรียบเทียบ และมีฤทธิ์ต่อเชื้อ atypical",
+  pk:"ค่าครึ่งชีวิตยาว ~48 ชม. • <b>ไม่ยับยั้งเอนไซม์ CYP</b>",
+  uses:"<b>ยาตัวเลือกร่วมสำหรับ Chlamydia</b> • ติดเชื้อทางเดินหายใจ, หูชั้นกลางอักเสบ, อุ้งเชิงกรานอักเสบ, โรคติดต่อทางเพศสัมพันธ์, MAC",
+  adr:MAC_ADR, note:"Pregnancy category B — ปลอดภัยในหญิงตั้งครรภ์" });
+add("Midecamycin", { group:"Macrolide วง 16 เหลี่ยม", mech:MAC_50,
+  spectrum:"แกรมบวกในทางเดินหายใจ และเชื้อ atypical",
+  uses:"ทางเดินหายใจ, หูชั้นกลางอักเสบ, อุ้งเชิงกราน, โรคติดต่อทางเพศสัมพันธ์",
+  adr:MAC_ADR, note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัว" });
+add("Spiramycin", { group:"Macrolide วง 16 เหลี่ยม", mech:MAC_50,
+  spectrum:"แกรมบวก และเชื้อ atypical",
+  uses:"ทางเดินหายใจ, หูชั้นกลางอักเสบ, อุ้งเชิงกราน, โรคติดต่อทางเพศสัมพันธ์",
+  adr:MAC_ADR, note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัว" });
+
+/* ---------- Lincosamide & other protein-synthesis inhibitors ---------- */
+add("Clindamycin", { group:"Lincosamide",
+  mech:"จับไรโบโซม<b>หน่วยย่อย 50S</b> • เป็น bacteriostatic หรือ bactericidal ขึ้นกับชนิดเชื้อ • time-dependent",
+  spectrum:"แกรมบวกหลายชนิด และ <b>anaerobe แท้จริงเกือบทั้งหมด</b> • <b>ไม่ได้ผล</b>กับแกรมลบ",
+  pk:"ชีวปริมาณออกฤทธิ์ทางปาก ~90% • กระจายตัวดี สะสมในเนื้อเยื่อรวมทั้ง<b>กระดูก</b> • ผ่านเข้า CSF ได้น้อย • ผ่านตับ ขับทางปัสสาวะและน้ำดี",
+  uses:"ผิวหนังและเนื้อเยื่ออ่อน, กระดูกและข้อ, ฟัน, ในช่องท้อง, อุ้งเชิงกราน",
+  adr:"<b>ลำไส้อักเสบเป็นเยื่อเทียมจาก C. difficile</b> (สำคัญที่สุด), ผื่นผิวหนัง",
+  note:"Pregnancy category B" });
+add("Chloramphenicol", { group:"ยับยั้งการสร้างโปรตีน (หน่วยย่อย 50S) spectrum กว้าง",
+  mech:MAC_50, spectrum:"กว้างมาก",
+  uses:"<b>สงวนไว้</b>สำหรับการติดเชื้อที่คุกคามชีวิตเมื่อไม่มีทางเลือกที่ปลอดภัยกว่า",
+  adr:"<b>ไขกระดูกฝ่อถาวร (aplastic anemia)</b> อาจถึงแก่ชีวิต • <b>Gray baby syndrome</b> ในทารกแรกเกิดจากตับยังทำงานไม่เต็มที่",
+  note:"กลไกดื้อยา: เอนไซม์ acetyltransferase, การขับยาออก (efflux), ผนังเซลล์ไม่ยอมให้ยาผ่าน • Pregnancy category C" });
+add("Linezolid", { group:"Oxazolidinone",
+  mech:"จับไรโบโซม<b>หน่วยย่อย 50S</b> ที่ 23S rRNA ยับยั้งการแปลรหัส • ยับยั้งการเจริญ (bacteriostatic)",
+  spectrum:"แกรมบวกแรง — MSSA, <b>MRSA</b>, Streptococci, Enterococci รวม <b>VRE</b> และ Nocardia • ฤทธิ์ต่อแกรมลบและ anaerobe ไม่ดี",
+  pk:"กำจัดผ่านตับ • <b>ไม่ต้องปรับขนาดยาเมื่อไตบกพร่อง</b>",
+  uses:"เมื่อ vancomycin ล้มเหลวหรือทนยาไม่ได้, ติดเชื้อผิวหนัง, ปอดอักเสบในโรงพยาบาล" });
+add("Tedizolid", { group:"Oxazolidinone",
+  mech:"ยับยั้งการแปลรหัสของแบคทีเรีย (หน่วยย่อย 50S)",
+  spectrum:"ตามคุณสมบัติของกลุ่ม", note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเฉพาะตัว" });
+add("Mupirocin", { group:"ยับยั้งการสร้างโปรตีน (กลไกเฉพาะ)",
+  mech:"ยับยั้งเอนไซม์ <b>isoleucyl-tRNA synthetase</b> ของแบคทีเรีย",
+  spectrum:"เอกสารต้นฉบับระบุเฉพาะเป้าหมายของยา",
+  note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเพิ่มเติม" });
+add("Quinupristin-dalfopristin", { group:"Streptogramin",
+  mech:"ยับยั้งการสร้างโปรตีนที่ไรโบโซม<b>หน่วยย่อย 50S</b>",
+  spectrum:"เอกสารต้นฉบับไม่ได้ระบุ",
+  note:"เอกสารต้นฉบับไม่ได้ระบุข้อบ่งใช้หรือผลข้างเคียง" });
+
+/* ---------- Quinolones ---------- */
+const FQ_M   = "ยับยั้ง <b>DNA gyrase</b> ในแกรมลบ และ <b>topoisomerase IV</b> ในแกรมบวก • ฆ่าเชื้อ (bactericidal) • ประสิทธิภาพขึ้นกับ<b>ความเข้มข้น</b> • มี PAE";
+const FQ_ADR = "<b>เอ็นฉีกขาด</b>, ทำลายกระดูกอ่อน, <b>QT prolongation</b>, ชัก (พบน้อย), ไวต่อแสง";
+const FQ_CI  = "เลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี • แยกเวลากินจากแคลเซียม เหล็ก แมกนีเซียม และยาลดกรด <b>อย่างน้อย 2 ชม.</b>";
+const FQ_U   = "ทางเดินปัสสาวะ, ต่อมลูกหมากอักเสบ, ทางเดินหายใจ, ทางเดินอาหาร/ช่องท้อง, กระดูกและข้อ, ผิวหนังและเนื้อเยื่ออ่อน";
+add("Ciprofloxacin", { group:"Fluoroquinolone รุ่นที่ 2", mech:FQ_M,
+  spectrum:"แกรมลบแรง รวม <b>Pseudomonas</b> • แกรมบวกบางชนิด และเชื้อ atypical",
+  pk:"ดูดซึมทางปากดี • Vd สูง ผ่านเข้ากระดูก ปอด ต่อมลูกหมาก และภายในเซลล์ • ขับทางไต",
+  uses:FQ_U, adr:FQ_ADR, note:"เลี่ยงในหญิงตั้งครรภ์ • " + FQ_CI });
+add("Norfloxacin", { group:"Fluoroquinolone รุ่นที่ 2", mech:FQ_M,
+  spectrum:"แกรมลบรวม Pseudomonas • แกรมบวกบางชนิด และเชื้อ atypical",
+  pk:"ชีวปริมาณออกฤทธิ์ทางปาก<b>ต่ำกว่า</b> fluoroquinolone ตัวอื่น",
+  uses:"ทางเดินปัสสาวะ, ต่อมลูกหมากอักเสบ", adr:FQ_ADR, note:FQ_CI });
+add("Levofloxacin", { group:"Fluoroquinolone รุ่นที่ 3", mech:FQ_M,
+  spectrum:"คงฤทธิ์แกรมลบ และเพิ่มแกรมบวกกับเชื้อ atypical",
+  pk:"ผ่านเข้ากระดูก ปอด และต่อมลูกหมากได้ดี • ขับทางไต",
+  uses:FQ_U, adr:FQ_ADR, note:"Pregnancy category C • " + FQ_CI });
+add("Moxifloxacin", { group:"Fluoroquinolone รุ่นที่ 3", mech:FQ_M,
+  spectrum:"เพิ่มแกรมบวกและเชื้อ atypical • กระจายเข้าเนื้อเยื่อกว้าง",
+  pk:"<b>กำจัดผ่านตับ</b>",
+  uses:"ทางเดินหายใจ, ทางเดินอาหาร/ช่องท้อง, กระดูกและข้อ, ผิวหนังและเนื้อเยื่ออ่อน",
+  adr:FQ_ADR, note:"Pregnancy category C • " + FQ_CI });
+add("Sparfloxacin", { group:"Fluoroquinolone รุ่นที่ 3", mech:FQ_M,
+  spectrum:"แกรมลบใกล้เคียงรุ่นที่ 2 และเพิ่มแกรมบวกกับเชื้อ atypical",
+  uses:"ทางเดินหายใจ, ทางเดินปัสสาวะ, ต่อมลูกหมากอักเสบ, ติดเชื้อในเนื้อเยื่อ",
+  adr:FQ_ADR, note:FQ_CI });
+add("Nalidixic acid", { group:"Quinolone รุ่นที่ 1",
+  mech:"ยับยั้งการสร้าง DNA ของแบคทีเรีย • ฆ่าเชื้อ (bactericidal)",
+  spectrum:"เน้นแกรมลบ แต่ <b>ไม่ครอบคลุม Pseudomonas</b>",
+  adr:FQ_ADR, note:"เลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี และหญิงตั้งครรภ์" });
+add("Cinoxacin", { group:"Quinolone รุ่นที่ 1",
+  mech:"ยับยั้งการสร้าง DNA ของแบคทีเรีย • ฆ่าเชื้อ (bactericidal)",
+  spectrum:"แกรมลบ <b>ไม่ครอบคลุม Pseudomonas</b>", adr:FQ_ADR });
+add("Trovafloxacin", { group:"Fluoroquinolone รุ่นที่ 4", mech:FQ_M,
+  spectrum:"คล้ายรุ่นที่ 3 และ<b>เพิ่มการครอบคลุม anaerobe อย่างกว้าง</b>",
+  uses:"ทางเดินหายใจ, ช่องท้อง, กระดูกและข้อ, ผิวหนังและเนื้อเยื่ออ่อน",
+  adr:FQ_ADR, note:"Pregnancy category C • เลี่ยงในผู้ที่อายุต่ำกว่า 18 ปี" });
+add("Rifampin (Rifampicin)", { group:"Rifamycin",
+  mech:"ยับยั้งการสร้าง <b>RNA</b> ของแบคทีเรีย • ฆ่าเชื้อ (bactericidal) • มี PAE",
+  spectrum:"ตามคุณสมบัติของกลุ่ม",
+  note:"กลไกดื้อยาที่พบบ่อยคือการกลายพันธุ์ของยีน <b>rpoB</b> • เอกสารต้นฉบับไม่ได้ระบุข้อบ่งใช้และผลข้างเคียงโดยละเอียด" });
+
+/* ---------- Folate-pathway inhibitors ---------- */
+const SULF_ADR = "คลื่นไส้อาเจียน, อาการแพ้, ผื่น, ไข้, eosinophilia, <b>Stevens-Johnson syndrome</b>, พิษต่อตับ, กดไขกระดูก, เม็ดเลือดแดงแตกในผู้ขาด <b>G6PD</b>";
+add("Sulfamethoxazole", { group:"Sulfonamide",
+  mech:"เป็นสารคล้าย PABA ยับยั้งเอนไซม์ <b>dihydropteroate synthase</b> ขวางการสร้างโฟเลต • ใช้เดี่ยวเป็น bacteriostatic",
+  spectrum:"ใช้คู่กับ trimethoprim เพื่อปิดกั้นวิถีโฟเลตสองจุด เกิดฤทธิ์เสริมกันจนฆ่าเชื้อได้",
+  pk:"ผ่านรกได้ → เสี่ยง <b>kernicterus</b> ในทารก",
+  adr:SULF_ADR, note:"อาจเกิดผลึกในปัสสาวะ (crystalluria) — ควรดื่มน้ำมาก ๆ" });
+add("Trimethoprim", { group:"ยับยั้งวิถีโฟเลต",
+  mech:"ยับยั้งเอนไซม์ในวิถีโฟเลตคนละจุดกับ sulfonamide • ใช้เดี่ยวเป็น bacteriostatic แต่<b>เสริมฤทธิ์เป็น bactericidal</b>เมื่อใช้คู่กับ sulfamethoxazole",
+  spectrum:"ใช้ในอัตราส่วน TMP:SMX = <b>1:5</b>",
+  pk:"ผ่านรกและน้ำนมได้",
+  uses:"(สูตรผสม) ทางเดินปัสสาวะ, หลอดลมอักเสบ, ตา/หู, เยื่อหุ้มสมองอักเสบ, ปอดอักเสบ, ป้องกันและรักษา Pneumocystis jirovecii",
+  adr:"ผื่น, SJS, กดไขกระดูก, เสี่ยง kernicterus" });
+add("Trimethoprim-sulfamethoxazole (Co-trimoxazole)", { group:"สูตรผสมยับยั้งวิถีโฟเลตสองจุด",
+  mech:"ปิดกั้นการสร้างโฟเลตแบบต่อเนื่อง (sequential blockade) • เสริมฤทธิ์กันเป็น bactericidal • อัตราส่วน <b>1:5</b>",
+  spectrum:"แกรมบวกและแกรมลบ • <b>สำคัญมากสำหรับ Pneumocystis jirovecii (PCP)</b> • ฤทธิ์ต่อ anaerobe ไม่ดี",
+  pk:"ดูดซึมทางปากดี กระจายตัวกว้าง • ผ่านรกและน้ำนม",
+  uses:"ทางเดินปัสสาวะ, หลอดลมอักเสบ, ตา/หู, เยื่อหุ้มสมองอักเสบจากแบคทีเรีย, ปอดอักเสบ, PCP, แผลไฟไหม้รุนแรง",
+  adr:SULF_ADR + ", kernicterus",
+  note:"อาจเกิดผลึกในปัสสาวะ — ดื่มน้ำมาก ๆ • Pregnancy category C" });
+
+/* ---------- Misc ---------- */
+add("Metronidazole", { group:"Nitroimidazole",
+  mech:"ทำลายโครงสร้างเกลียวของ DNA • ฆ่าเชื้อ (bactericidal)",
+  spectrum:"<b>anaerobe</b> และโปรโตซัว",
+  pk:"ชีวปริมาณออกฤทธิ์ทางปาก ~80% • จับโปรตีน &lt;20% • กระจายตัวกว้าง <b>ผ่านเข้า CSF ในระดับรักษาได้</b> และซึมเข้าฝีหนองได้ดี • ผ่านตับ ยับยั้ง CYP2C9 • ค่าครึ่งชีวิต ~8 ชม. (นานขึ้นเมื่อตับบกพร่อง) • ขับทางปัสสาวะเป็นหลัก",
+  uses:"ติดเชื้อ anaerobe ในช่องท้อง, ฝีในสมอง, ลำไส้อักเสบจาก C. difficile, สูตรร่วมกำจัด H. pylori, บิดมีตัว, giardiasis, ช่องคลอดอักเสบ",
+  adr:"<b>ปฏิกิริยาคล้าย disulfiram เมื่อดื่มแอลกอฮอล์</b>, ปัสสาวะสีเข้ม",
+  note:"<b>งดแอลกอฮอล์</b>ระหว่างและหลังใช้ยา • Pregnancy category B" });
+add("Nitrofurantoin", { group:"ยาต้านแบคทีเรียในทางเดินปัสสาวะ",
+  mech:"ทำให้ DNA ของแบคทีเรียเสียหาย • ยับยั้งการเจริญ (bacteriostatic)",
+  spectrum:"จำกัดอยู่ที่ <b>E. coli</b> เป็นหลัก",
+  uses:"ติดเชื้อทางเดินปัสสาวะแบบไม่ซับซ้อน",
+  note:"เอกสารต้นฉบับไม่ได้ระบุข้อมูลเภสัชจลนศาสตร์หรือผลข้างเคียงเพิ่มเติม" });
+add("Daptomycin", { group:"Lipopeptide",
+  mech:"ทำให้เยื่อหุ้มเซลล์แบคทีเรียทำงานผิดปกติ", spectrum:"แกรมบวก",
+  uses:"ทางเลือกสำหรับการติดเชื้อ <b>MRSA</b>",
+  note:"เอกสารต้นฉบับไม่ได้ให้รายละเอียดเภสัชจลนศาสตร์หรือผลข้างเคียง" });
+add("Polymyxins", { group:"Polymyxin (ออกฤทธิ์ที่เยื่อหุ้มเซลล์)",
+  mech:"รบกวนเยื่อหุ้มเซลล์ของแบคทีเรีย", spectrum:"แกรมลบ",
+  note:"กลไกดื้อยาเกี่ยวข้องกับการดัดแปลงเยื่อหุ้มเซลล์ผ่านระบบ <b>PhoP-PhoQ</b> • เอกสารต้นฉบับไม่ได้ระบุรายชื่อยารายตัว" });
+
+/* ---------- การแสดงผลคำตอบเป็นหัวข้อ ---------- */
+const FIELDS = [
+  ["group",    "กลุ่ม",        false],
+  ["mech",     "กลไก",         false],
+  ["spectrum", "ครอบคลุม",     false],
+  ["pk",       "PK / การใช้",  false],
+  ["uses",     "ข้อบ่งใช้",     false],
+  ["adr",      "ผลข้างเคียง",  true ],
+  ["note",     "ข้อควรจำ",     true ]
+];
+
+function renderAnswer(card){
+  var html = "";
+  for (var i = 0; i < FIELDS.length; i++){
+    var key = FIELDS[i][0], label = FIELDS[i][1], warn = FIELDS[i][2];
+    var val = card[key];
+    if (!val) continue;
+    html += '<div class="row' + (warn ? ' warn' : '') + '">'
+          +   '<div class="k">' + label + '</div>'
+          +   '<div class="v">' + val + '</div>'
+          + '</div>';
+  }
+  return html;
+}
+
+function freshDeck(){
+  return RAW.map(function(d){
+    var c = {};
+    for (var k in d) c[k] = d[k];
+    c.weight = 1;
+    return c;
+  });
+}
+
+let cards = freshDeck();
 
 const MIN_W = 0.25;
 const MAX_W = 12;
@@ -245,7 +627,7 @@ function nextCard(){
 
   document.getElementById('q-tag').textContent = 'ยาทั้งหมด ' + cards.length + ' ตัว · ใบที่ ' + totalShown;
   document.getElementById('q-text').textContent = current.name;
-  document.getElementById('a-text').textContent = current.desc;
+  document.getElementById('a-text').innerHTML = renderAnswer(current);
 
   document.getElementById('answer').style.display = 'none';
   document.getElementById('show-btn').style.display = 'inline-block';
@@ -278,7 +660,7 @@ document.getElementById('wrong-btn').onclick = function(){
 };
 
 document.getElementById('restart-btn').onclick = function(){
-  cards = RAW.map(function(d){ return { name: d.name, desc: d.desc, weight: 1 }; });
+  cards = freshDeck();
   totalShown = 0; totalRight = 0; totalWrong = 0;
   current = null; prev = null;
   nextCard();
