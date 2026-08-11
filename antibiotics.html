@@ -50,6 +50,13 @@
   #brand span{
     display:block; font-size:11.5px; color:var(--sub); margin-top:2px; font-weight:500;
   }
+  #back-btn{
+    border:1px solid var(--line); background:var(--paper); color:var(--sub);
+    font-size:12px; padding:7px 14px; border-radius:20px; cursor:pointer; font-family:inherit; transition:.15s;
+    text-decoration:none; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  #back-btn:hover{border-color:var(--teal); color:var(--teal-deep);}
+
   #restart-btn{
     border:1px solid var(--line); background:var(--paper); color:var(--sub);
     font-size:12px; padding:7px 14px; border-radius:20px; cursor:pointer;
@@ -162,6 +169,7 @@
 <body>
 
 <div id="topbar">
+  <a id="back-btn" href="index.html" aria-label="กลับไปหน้าเมนูเด็ค">&#8592; เมนู</a>
   <div id="brand">
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
       <rect x="2" y="9" width="20" height="6" rx="3" transform="rotate(-45 12 12)" fill="#1f6f54"/>
