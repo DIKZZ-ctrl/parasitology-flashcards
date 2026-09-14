@@ -24,28 +24,84 @@
   .deck-link:hover{ transform:translateY(-2px); }
   .deck-link .name{ font-weight:700; font-size:16px; }
   .deck-link .desc{ font-size:12.5px; color:var(--sub); margin-top:4px; }
+  .empty, .err{ color:var(--sub); font-size:13px; text-align:center; }
 </style>
 </head>
 <body>
   <h1>MedRecall Flashcard Decks</h1>
   <p class="sub">เลือกเด็คที่จะทวน</p>
-  <div class="deck-list">
-    <a class="deck-link" href="flashcards_pro.html">
-      <div class="name">Parasitology</div>
-      <div class="desc">โปรโตซัว หนอนพยาธิ แมลง — 32 ใบ</div>
-    </a>
-    <a class="deck-link" href="antiviral-antifungal-antiparasitic.html">
-      <div class="name">Antiviral / Antifungal / Antiparasitic</div>
-      <div class="desc">ยาต้านไวรัส เชื้อรา ปรสิต — 42 ใบ</div>
-    </a>
-    <a class="deck-link" href="antibiotics.html">
-      <div class="name">Antimicrobial</div>
-      <div class="desc">ยาต้านจุลชีพ (แบคทีเรีย) — 76 ใบ</div>
-    </a>
-    <a class="deck-link" href="dermpath.html">
-      <div class="name">EXAM SKIN SUMET MODULE 185</div>
-      <div class="desc">ข้อสอบข้อกาพร้อมเฉลยละเอียด</div>
-    </a>
+  <div class="deck-list" id="deckList">
+    <div class="empty">กำลังโหลดรายการ…</div>
   </div>
+
+<script>
+/*
+  Deck list is generated automatically from the files in this repo, so a new
+  .html file added to the repo root shows up here without editing this page.
+  Known files get a curated Thai name/description below; anything new falls
+  back to a title made from the filename.
+*/
+const KNOWN = {
+  "flashcards_pro.html": { name: "Parasitology", desc: "โปรโตซัว หนอนพยาธิ แมลง — 32 ใบ" },
+  "antiviral-antifungal-antiparasitic.html": { name: "Antiviral / Antifungal / Antiparasitic", desc: "ยาต้านไวรัส เชื้อรา ปรสิต — 42 ใบ" },
+  "antibiotics.html": { name: "Antimicrobial", desc: "ยาต้านจุลชีพ (แบคทีเรีย) — 76 ใบ" },
+  "dermpath.html": { name: "EXAM SKIN SUMET MODULE 185", desc: "ข้อสอบข้อกาพร้อมเฉลยละเอียด" },
+  "dermpath_exam.html": { name: "Dermatopathology Exam", desc: "ข้อสอบข้อกาพร้อมเฉลยละเอียด" },
+  "pathology-bone-joint-soft-tissue-tumor-exam.html": { name: "Bone, Joint & Soft Tissue Tumor Pathology", desc: "ข้อสอบข้อกาพร้อมเฉลยละเอียด" }
+};
+
+function titleFromFilename(filename){
+  return filename
+    .replace(/\.html?$/i, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+async function loadDecks(){
+  const listEl = document.getElementById("deckList");
+  const owner = "DIKZZ-ctrl";
+  const repo = "parasitology-flashcards";
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/`, {
+      headers: { "Accept": "application/vnd.github+json" }
+    });
+    if (!res.ok) throw new Error("GitHub API " + res.status);
+    const items = await res.json();
+
+    const decks = items
+      .filter(it => it.type === "file" && /\.html?$/i.test(it.name) && it.name.toLowerCase() !== "index.html")
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (decks.length === 0){
+      listEl.innerHTML = '<div class="empty">ยังไม่มีเด็คในตอนนี้</div>';
+      return;
+    }
+
+    listEl.innerHTML = decks.map(function(it){
+      const meta = KNOWN[it.name] || { name: titleFromFilename(it.name), desc: "" };
+      return (
+        '<a class="deck-link" href="' + it.name + '">' +
+          '<div class="name">' + meta.name + '</div>' +
+          (meta.desc ? '<div class="desc">' + meta.desc + '</div>' : '') +
+        '</a>'
+      );
+    }).join("");
+  } catch (err) {
+    // Fallback: GitHub API unreachable (rate-limited, offline, etc.) — show the known decks statically.
+    listEl.innerHTML = Object.keys(KNOWN).map(function(filename){
+      const meta = KNOWN[filename];
+      return (
+        '<a class="deck-link" href="' + filename + '">' +
+          '<div class="name">' + meta.name + '</div>' +
+          '<div class="desc">' + meta.desc + '</div>' +
+        '</a>'
+      );
+    }).join("") + '<div class="err">(โหลดรายการล่าสุดจาก GitHub ไม่สำเร็จ — แสดงรายการที่บันทึกไว้แทน)</div>';
+  }
+}
+
+loadDecks();
+</script>
 </body>
 </html>
